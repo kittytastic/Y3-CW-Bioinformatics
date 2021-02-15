@@ -5,3 +5,6 @@
 *.synctex.gz
 
 Report/*.pdf
+
+
+__pycache__
