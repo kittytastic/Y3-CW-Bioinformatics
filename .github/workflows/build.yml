@@ -40,10 +40,10 @@ jobs:
         run: python Code/testEM.py
         working-directory: ./
       
-      - name: Clean Solution
-        working-directory: ./tmp
-        run: |
-          rm -r __pycache__
+      #- name: Clean Solution
+      #  working-directory: ./tmp
+      #  run: |
+      #    rm -r __pycache__
 
       # LATEX
       - name: Build Latex
