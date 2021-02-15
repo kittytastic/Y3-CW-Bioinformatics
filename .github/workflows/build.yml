@@ -37,8 +37,8 @@ jobs:
           pip install bitstring
 
       - name: Test Solution
-        run: python testEM.py
-        working-directory: ./tmp
+        run: python Code/testEM.py
+        working-directory: ./
       
       - name: Clean Solution
         working-directory: ./tmp
