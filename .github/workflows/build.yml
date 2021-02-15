@@ -1,0 +1,86 @@
+name:  Create Submission
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build_zip:
+    name: Create Submission
+    runs-on: ubuntu-latest
+
+    env:
+      Target_Name: qwrx21.zip
+      Files: ${{ join(fromJSON('[
+        "Code/???.py",
+        ]'), ' ') }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.5' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+
+      - name: Prepare Directory
+        run: mkdir tmp
+
+      - name: Copy Files
+        run:  cp ${{env.Files}} ./tmp
+
+      # TEST
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bitstring
+
+      - name: Test Solution
+        run: python testEncoderDecoder.py Small
+        working-directory: ./tmp
+      
+      - name: Clean Solution
+        working-directory: ./tmp
+        run: |
+          rm -r __pycache__
+
+      # LATEX
+      - name: Build Latex
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: |
+            Report/report.tex
+
+      - name: Copy Data Report 
+        run:  cp report.pdf ./tmp/Answers.pdf
+      
+  
+      # ZIP final solution
+      - name: ZIP Files
+        run: zip ${{env.Target_Name}} *
+        working-directory: ./tmp
+
+      
+      # Create release
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref}}
+          release_name:  ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      # Upload as asset
+      - name: Upload as an asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./tmp/${{env.Target_Name}}
+          asset_name: ${{env.Target_Name}}
+          asset_content_type: application/zip
