@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      Target_Name: qwrx21.zip
+      Target_Name: qwrx21-bio
       Files: ${{ join(fromJSON('[
-        "Code/???.py",
+        "Code/EM.py",
         ]'), ' ') }}
 
     steps:
@@ -37,7 +37,7 @@ jobs:
           pip install bitstring
 
       - name: Test Solution
-        run: python testEncoderDecoder.py Small
+        run: python testEM.py
         working-directory: ./tmp
       
       - name: Clean Solution
@@ -54,11 +54,20 @@ jobs:
 
       - name: Copy Data Report 
         run:  cp report.pdf ./tmp/Answers.pdf
+
+      # Version
+      - name: Make name
+        id: full_name
+        run: echo "::set-output name=name::${{env.Target_Name}}-${GITHUB_REF##*/}.zip"
+
+      - name: Add Version File
+        run: printf 'Submission auto-built at %s %s using \nVersion Tag:%s \nCommit Hash:%s' $(date +'%H:%M:%S %d-%m-%Y') ${GITHUB_REF##*/} $GITHUB_SHA >> VERSION.md
+        working-directory: ./tmp
       
   
       # ZIP final solution
       - name: ZIP Files
-        run: zip ${{env.Target_Name}} *
+        run: zip ${{steps.full_name.outputs.name}} *
         working-directory: ./tmp
 
       
@@ -81,6 +90,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}  # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./tmp/${{env.Target_Name}}
-          asset_name: ${{env.Target_Name}}
+          asset_path: ./tmp/${{steps.full_name.outputs.name}}
+          asset_name: ${{steps.full_name.outputs.name}}
           asset_content_type: application/zip
