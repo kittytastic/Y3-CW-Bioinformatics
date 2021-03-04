@@ -37,28 +37,12 @@ def createInitialModel(hidden_states, observeable_states):
 def calculateAlpha(model, observedSeq):
     alpha = np.zeros((len(observedSeq), model.hidden))
 
-    #print(model.e)
-    #print(model.e[:, observedSeq[0]])
-    #print(model.pi)
-    #print(model.e[:, observedSeq[0]])
+    # Base case: alpha_1(i) = pi_i * e_i(O_1)
     alpha[0] = model.pi * model.e[:, observedSeq[0]]
     
-    #model.m[0, 0] = 0.1 
-    #model.m[0,-1] = 0.3
-    #print(model.m) 
-    #print(model.m[0])
 
-    m__j = model.m[:,0]
-    a_t = alpha[0]
-    #print(m__j)
-    #print(a_t)
-
-    #print(model.e[0, 0])
-    #print(a_t*m__j)
-    #print(np.sum(a_t*m__j))
-    #print()
-
-
+    # Inductive case: alpha_{t+1}(j) = [\sigma_{i=1}^N alpha_t(i) m_ij ] * e_i(O_1)
+    # i.e. Prob state j at t+1 = sum (prob state i at t * transition i->j)  * prob emit obs t+1
     for t in range(1, len(observedSeq), 1):
         for j in range(model.hidden):
             m__j = model.m[:,j]
@@ -67,6 +51,23 @@ def calculateAlpha(model, observedSeq):
         
 
     return alpha
+
+def calculateBeta(model, observedSeq):
+    beta = np.zeros((len(observedSeq), model.hidden))
+
+    # Base case
+    beta[-1] = np.ones(model.hidden)
+
+    # Inductive case
+    i = 0
+    seq_i = -1
+    ans = np.sum(model.m[i]*model.e[:,observedSeq[-1]]*beta[-1])
+
+    for t in reversed(range(len(observedSeq)-1)):
+        for i in range(model.hidden):
+            beta[t, i] = np.sum(model.m[i]*model.e[:,observedSeq[t+1]]*beta[t+1])
+
+    return beta
 
 def assertFileExists(path):
     if not os.path.isfile(path):

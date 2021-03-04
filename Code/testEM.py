@@ -63,5 +63,42 @@ class TestCalcAlpha(unittest.TestCase):
 
         self.assertAlmostEqual(summed, 1.0)
 
+
+class TestCalcBeta(unittest.TestCase):
+    hidden = 5
+    observe = 3
+    model = createInitialModel(hidden, observe)
+
+    def test_base_case(self):
+        obsStates = [0,1,2]
+        beta = calculateBeta(self.model, [0,1,2])
+
+        self.assertTrue(np.array_equal(beta[-1], np.ones(self.hidden)))
+
+    
+    def test_inductive_case(self):
+        obsStates = [0,1,2]
+        beta = calculateBeta(self.model, [0,1,2])
+        
+        i = 0
+        expected = np.sum(self.model.m[i]*self.model.e[:,obsStates[-1]]*beta[-1])
+        self.assertEqual(beta[-2, i], expected)
+
+    
+    def test_inductive_case_sum_1(self):
+        obsStates = [0,1,2]
+        beta = calculateBeta(self.model, [0,1,2])
+        
+        i = 0
+        expected = np.sum(self.model.m[i]*self.model.e[:,obsStates[-1]]*beta[-1])
+        summed = 0
+
+        for i in range(self.observe):
+            for j in range(self.observe):
+                beta = calculateBeta(self.model, [0, i, j])
+                summed += beta[0,0]
+
+        self.assertAlmostEqual(summed, 1.0)
+
 if __name__ == '__main__':
     unittest.main()
