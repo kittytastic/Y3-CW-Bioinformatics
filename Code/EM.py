@@ -69,6 +69,16 @@ def calculateBeta(model, observedSeq):
 
     return beta
 
+def calculateGamma(model, observedSeq, alpha, beta):
+    gamma = np.zeros((len(observedSeq), model.hidden))
+
+    gamma = alpha * beta
+
+    for t in range(len(observedSeq)):
+        gamma[t] /= np.sum(gamma[t])
+
+    return gamma
+
 def assertFileExists(path):
     if not os.path.isfile(path):
         print("ERROR: %s doesn't exist."%path) 

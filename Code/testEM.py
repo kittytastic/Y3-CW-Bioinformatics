@@ -93,12 +93,46 @@ class TestCalcBeta(unittest.TestCase):
         expected = np.sum(self.model.m[i]*self.model.e[:,obsStates[-1]]*beta[-1])
         summed = 0
 
+        # sum over all paths for a particular state
         for i in range(self.observe):
             for j in range(self.observe):
                 beta = calculateBeta(self.model, [0, i, j])
                 summed += beta[0,0]
 
         self.assertAlmostEqual(summed, 1.0)
+
+class TestCalcGamma(unittest.TestCase):
+    hidden = 5
+    observe = 3
+    model = createInitialModel(hidden, observe)
+
+    def test_single_value(self):
+        obsStates = [0,1,2]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+
+        # Gamma values are normalized over each timestep
+        # To avoid normalising in test check ratio between expected and calc vals
+        unnorm_v1 = alpha[0,0] * beta[0,0]
+        unnorm_v2 = alpha[0,1] * beta[0,1]
+
+        r1 = unnorm_v1/unnorm_v2
+        r2 = gamma[0,0]/gamma[0,1]
+        
+        self.assertEqual(r1, r2)
+    
+    def test_t_sum_1(self):
+        obsStates = [0,1,2]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+
+        for i in range(self.observe):
+            self.assertAlmostEqual(np.sum(gamma[i]), 1)
+
 
 if __name__ == '__main__':
     unittest.main()
