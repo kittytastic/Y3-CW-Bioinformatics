@@ -79,6 +79,27 @@ def calculateGamma(model, observedSeq, alpha, beta):
 
     return gamma
 
+def calculateXi(model, observedSeq, alpha, beta, gamma):
+    xi = np.zeros((len(observedSeq)-1, model.hidden, model.hidden))
+
+    for t in range(len(observedSeq)-1):
+        e_obs = model.e[:,observedSeq[t+1]] 
+        beta_t = beta[t+1]
+        alpha_t = alpha[t]
+
+        j_row = e_obs * beta_t
+
+        #print(e_obs)
+        #print(beta_t)
+        #print(alpha_t)
+        #print(model.m)
+
+        ts = np.outer(alpha_t, j_row) * model.m
+        xi[t] = ts / np.sum(ts)
+        #print(ans)
+
+    return xi
+
 def assertFileExists(path):
     if not os.path.isfile(path):
         print("ERROR: %s doesn't exist."%path) 

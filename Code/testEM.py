@@ -134,5 +134,55 @@ class TestCalcGamma(unittest.TestCase):
             self.assertAlmostEqual(np.sum(gamma[i]), 1)
 
 
+class TestCalcXi(unittest.TestCase):
+    hidden = 5
+    observe = 3
+    model = createInitialModel(hidden, observe)
+
+    def test_single_value(self):
+        obsStates = [0,1,2]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+        xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
+
+        i_1 = 0
+        j_1 = 0
+        i_2 = 0
+        j_2 = 0
+        t = 1
+        unnorm_v1 = alpha[t, i_1]* self.model.m[i_1, j_1]*self.model.e[j_1, obsStates[t+1]]*beta[t+1, j_1]
+        unnorm_v2 = alpha[t, i_2]* self.model.m[i_2, j_2]*self.model.e[j_2, obsStates[t+1]]*beta[t+1, j_2]
+
+        r1 = unnorm_v1/unnorm_v2
+        r2 = xi[t, i_1, j_1]/xi[t, i_2, j_2]
+        
+        self.assertEqual(r1, r2)
+
+    def test_t_sum_1(self):
+        obsStates = [0,1,2]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+        xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
+
+        for t in range(len(obsStates)-1):
+            self.assertAlmostEqual(np.sum(xi[t]), 1.0)
+
+    def test_j_sum_gamma(self):
+        obsStates = [0,1,2]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+        xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
+
+        for t in range(len(obsStates)-1):
+            for i in range(self.model.hidden):
+                self.assertAlmostEqual(np.sum(xi[t, i]), gamma[t,i])
+
+
 if __name__ == '__main__':
     unittest.main()
