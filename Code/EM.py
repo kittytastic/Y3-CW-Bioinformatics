@@ -5,9 +5,10 @@ import numpy as np
 
 class Model():
     def __init__(self, pi, m, e):
-        self.pi = pi
-        self.m = m
-        self.e = e
+        self.pi = pi # [hidden]
+        self.m = m # [from, to]
+        self.e = e # [hidden, observed]
+        self.hidden, self.observeable = e.shape 
 
     def __str__(self):
         outS = "--- pi ---\n"
@@ -33,7 +34,39 @@ def createInitialModel(hidden_states, observeable_states):
 
     return Model(pi, m, e)
 
+def calculateAlpha(model, observedSeq):
+    alpha = np.zeros((len(observedSeq), model.hidden))
 
+    #print(model.e)
+    #print(model.e[:, observedSeq[0]])
+    #print(model.pi)
+    #print(model.e[:, observedSeq[0]])
+    alpha[0] = model.pi * model.e[:, observedSeq[0]]
+    
+    #model.m[0, 0] = 0.1 
+    #model.m[0,-1] = 0.3
+    #print(model.m) 
+    #print(model.m[0])
+
+    m__j = model.m[:,0]
+    a_t = alpha[0]
+    #print(m__j)
+    #print(a_t)
+
+    #print(model.e[0, 0])
+    #print(a_t*m__j)
+    #print(np.sum(a_t*m__j))
+    #print()
+
+
+    for t in range(1, len(observedSeq), 1):
+        for j in range(model.hidden):
+            m__j = model.m[:,j]
+            a_t = alpha[t-1]
+            alpha[t, j] = np.sum(a_t*m__j)*model.e[j, observedSeq[t]]
+        
+
+    return alpha
 
 def assertFileExists(path):
     if not os.path.isfile(path):
