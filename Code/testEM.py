@@ -184,5 +184,50 @@ class TestCalcXi(unittest.TestCase):
                 self.assertAlmostEqual(np.sum(xi[t, i]), gamma[t,i])
 
 
+class TestIterModel(unittest.TestCase):
+    hidden = 5
+    observe = 3
+    model = createInitialModel(hidden, observe)
+
+    def test_pi_sum_1(self):
+        obsStates = [0,1,2]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+        xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
+
+        new_model = iterateModel(self.model, obsStates, gamma, xi)
+        
+        self.assertAlmostEqual(np.sum(new_model.pi), 1.0)
+
+    def test_m_sum_1(self):
+        obsStates = [0,1,2,1,1]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+        xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
+
+        new_model = iterateModel(self.model, obsStates, gamma, xi)
+
+        for i in range(self.hidden):
+            self.assertAlmostEqual(np.sum(new_model.m[i]), 1.0)
+
+    def test_e_sum_1(self):
+        obsStates = [0,1,1,1]
+        alpha = calculateAlpha(self.model, obsStates)
+        beta = calculateBeta(self.model, obsStates)
+
+        gamma = calculateGamma(self.model, obsStates, alpha, beta)
+        xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
+
+        new_model = iterateModel(self.model, obsStates, gamma, xi)
+
+        for i in range(self.hidden):
+            self.assertAlmostEqual(np.sum(new_model.e[i]), 1.0)
+
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -89,16 +89,29 @@ def calculateXi(model, observedSeq, alpha, beta, gamma):
 
         j_row = e_obs * beta_t
 
-        #print(e_obs)
-        #print(beta_t)
-        #print(alpha_t)
-        #print(model.m)
-
         ts = np.outer(alpha_t, j_row) * model.m
         xi[t] = ts / np.sum(ts)
-        #print(ans)
 
     return xi
+
+
+def iterateModel(model, observedSeq, gamma, xi):
+    pi = gamma[1]
+
+    # only sum over 0 -> T-1, easy for xi, fiddle for gamma
+    m = np.sum(xi, axis=0)/(np.sum(gamma, axis=0)-gamma[-1])
+
+    e = np.ones((model.hidden, model.observeable))
+    for i in range(model.hidden):
+        for k in range(model.observeable):
+            gamma_ik_mask = np.where(np.array(observedSeq)==k, True, False)
+            gamma_ik = np.sum(gamma[:,i], where=gamma_ik_mask)
+            e[i,k]=gamma_ik
+        
+        e[i] /= np.sum(e[i])
+            
+    
+    return Model(pi, m, e)
 
 def assertFileExists(path):
     if not os.path.isfile(path):
