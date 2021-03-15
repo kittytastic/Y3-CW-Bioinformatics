@@ -1,6 +1,9 @@
 import argparse
 import os
 import numpy as np
+import matplotlib.pyplot as plt
+
+import math
 
 
 class Model():
@@ -21,16 +24,25 @@ class Model():
         return outS
 
 def createInitialModel(hidden_states, observeable_states):
-    pi = np.ones(hidden_states)
-    pi /= hidden_states
+    #pi = np.ones(hidden_states)
+    #pi /= hidden_states
 
-    m = np.ones((hidden_states, hidden_states))
-    for i in range(hidden_states):
-        m[i] /= hidden_states
+    #m = np.ones((hidden_states, hidden_states))
+    #for i in range(hidden_states):
+    #    m[i] /= hidden_states
 
-    e = np.ones((hidden_states, observeable_states))
-    for i in range(hidden_states):
-        e[i] /= observeable_states
+    #e = np.ones((hidden_states, observeable_states))
+    #for i in range(hidden_states):
+    #    e[i] /= observeable_states
+
+    pi = np.random.rand(hidden_states)
+    pi /= pi.sum()
+
+    m = np.random.rand(hidden_states, hidden_states)
+    m /= np.expand_dims(m.sum(axis=1), axis=1)
+
+    e = np.random.rand(hidden_states, observeable_states)
+    e /= np.expand_dims(e.sum(axis=1), axis=1)
 
     return Model(pi, m, e)
 
@@ -99,7 +111,7 @@ def iterateModel(model, observedSeq, gamma, xi):
     pi = gamma[1]
 
     # only sum over 0 -> T-1, easy for xi, fiddle for gamma
-    m = np.sum(xi, axis=0)/(np.sum(gamma, axis=0)-gamma[-1])
+    m = np.sum(xi, axis=0)/np.expand_dims((np.sum(gamma, axis=0)-gamma[-1]), axis=1)
 
     e = np.ones((model.hidden, model.observeable))
     for i in range(model.hidden):
@@ -113,29 +125,55 @@ def iterateModel(model, observedSeq, gamma, xi):
     
     return Model(pi, m, e)
 
-def assertFileExists(path):
-    if not os.path.isfile(path):
-        print("ERROR: %s doesn't exist."%path) 
-        exit()
+def probOfObservations(model, observedSeq):
+    alpha = calculateAlpha(model, observedSeq)
+    p = np.sum(alpha[-1])
+    return p
+
+
+def estimateModel(observedSeq, num_hidden_states, num_observeable_states):
+
+    model = createInitialModel(num_hidden_states, num_observeable_states)
+    print("P init: %.2f"%probOfObservations(model, observedSeq))
+    
+
+    iterProb = []
+    lastP = 0.0
+    iterProb.append(lastP)
+    i = 0
+    converged = False
+    while not converged:
+    #for i in range(1000):
+        i += 1
+        alpha = calculateAlpha(model, observedSeq)
+        beta = calculateBeta(model, observedSeq)
+        gamma = calculateGamma(model, observedSeq, alpha, beta)
+        xi = calculateXi(model, observedSeq, alpha, beta, gamma)
+        model = iterateModel(model, observedSeq, gamma, xi)
+        
+        newP = probOfObservations(model, observedSeq)
+        iterProb.append(newP)
+        print("P %d: %.2e"%( i, newP))
+
+        if math.isclose(lastP, newP):
+            converged = True
+        
+        lastP = newP
+
+    return iterProb
 
 if __name__ =="__main__":
+    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2]
+    hidden = 12
+    observeable = 5
 
-    parser = argparse.ArgumentParser(description='EM')
-    #parser.add_argument("file_path")
-    parser.add_argument("-k", dest="num_states", help="Number of hidden states")
-    parser.add_argument("-s", dest="num_alpabet", help="Number of symbols in alphabet")
-    #parser.add_argument("-k", dest="num_states", help="Number of hidden states", action='store_true')
-    #parser.add_argument("--type", dest="testType", help="Select a test type from:",default="live" )
-    
-    args = parser.parse_args()
-    #os.environ['TRIAL'] = "T" if args.trial else "F"
-    
-    num_hidden_states = int(args.num_states)
-    num_alphabet_sym = int(args.num_alpabet)
+    for i in range(5):
+        probs = estimateModel(observedSeq, hidden, observeable) 
+        plt.plot(probs, color='C%d'%i)
+    plt.ylabel('p(path|model)')
+    plt.yscale('log')
 
-    model = createInitialModel(num_hidden_states, num_alphabet_sym)
-
-    print(model)
-    print(np.sum(model.e, axis=1))
+    plt.xlabel('Model iteration')
+    plt.savefig("temp.png")
 
    
