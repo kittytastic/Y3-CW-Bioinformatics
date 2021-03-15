@@ -124,19 +124,17 @@ def calculateAlpha(model, observedSeq):
     return alpha
 
 def calculateBeta(model, observedSeq):
-    beta = np.zeros((len(observedSeq), model.hidden))
+    beta = np.ones((len(observedSeq), model.hidden))
 
     # Base case
-    beta[-1] = np.ones(model.hidden)
+    beta[-1] = np.zeros(model.hidden) # log(1) = 0
 
     # Inductive case
     i = 0
-    seq_i = -1
-    ans = np.sum(model.m[i]*model.e[:,observedSeq[-1]]*beta[-1])
 
     for t in reversed(range(len(observedSeq)-1)):
         for i in range(model.hidden):
-            beta[t, i] = np.sum(model.m[i]*model.e[:,observedSeq[t+1]]*beta[t+1])
+            beta[t, i] = logAddExp(model.m[i]+model.e[:,observedSeq[t+1]]+beta[t+1])
 
     return beta
 

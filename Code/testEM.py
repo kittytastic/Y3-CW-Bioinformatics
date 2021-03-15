@@ -79,7 +79,7 @@ class TestCalcBeta(unittest.TestCase):
         obsStates = [0,1,2]
         beta = calculateBeta(self.model, [0,1,2])
 
-        self.assertTrue(np.array_equal(beta[-1], np.ones(self.hidden)))
+        self.assertTrue(np.array_equal(beta[-1], np.log(np.ones(self.hidden))))
 
     
     def test_inductive_case(self):
@@ -87,7 +87,7 @@ class TestCalcBeta(unittest.TestCase):
         beta = calculateBeta(self.model, [0,1,2])
         
         i = 0
-        expected = np.sum(self.model.m[i]*self.model.e[:,obsStates[-1]]*beta[-1])
+        expected = logAddExp(self.model.m[i]+self.model.e[:,obsStates[-1]]+beta[-1])
         self.assertEqual(beta[-2, i], expected)
 
     
@@ -95,17 +95,14 @@ class TestCalcBeta(unittest.TestCase):
         obsStates = [0,1,2]
         beta = calculateBeta(self.model, [0,1,2])
         
-        i = 0
-        expected = np.sum(self.model.m[i]*self.model.e[:,obsStates[-1]]*beta[-1])
-        summed = 0
-
+        betas = []
         # sum over all paths for a particular state
         for i in range(self.observe):
             for j in range(self.observe):
                 beta = calculateBeta(self.model, [0, i, j])
-                summed += beta[0,0]
+                betas.append(beta[0,0])
 
-        self.assertAlmostEqual(summed, 1.0)
+        self.assertAlmostEqual(logAddExp(betas), LOG_1)
 
 class TestCalcGamma(unittest.TestCase):
     hidden = 5
