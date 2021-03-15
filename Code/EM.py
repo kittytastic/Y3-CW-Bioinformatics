@@ -130,11 +130,29 @@ def probOfObservations(model, observedSeq):
     p = np.sum(alpha[-1])
     return p
 
+'''
+Main function:
 
-def estimateModel(observedSeq, num_hidden_states, num_observeable_states):
+Runs the Baum-Welch Algorithm until model reaches a local optimum
 
-    model = createInitialModel(num_hidden_states, num_observeable_states)
-    print("P init: %.2f"%probOfObservations(model, observedSeq))
+Arg:
+    observedSeq: The observed sequence as a List of integers
+    numHiddenStates: The number of hidden states in the model as an integer
+    numObserveableStates: The size of the alphabet as an integer
+    verbose (optional): default verbose=False
+
+Returns (as tuple):
+    [0] Initial Probabilites: numpy array (1D) 
+    [1] Transition Probabilites: numpy array (2D) indexed as [from state si, to state sj]
+    [2] Emission Probabilities: numpy array (2D) indexed as [from state si, to symbol l]
+    [3] p(observation|model) for all iterations of the model: List
+'''
+
+def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=False):
+
+    model = createInitialModel(numHiddenStates, numObserveableStates)
+    if verbose:
+        print("P initial: %.2f"%probOfObservations(model, observedSeq))
     
 
     iterProb = []
@@ -143,7 +161,6 @@ def estimateModel(observedSeq, num_hidden_states, num_observeable_states):
     i = 0
     converged = False
     while not converged:
-    #for i in range(1000):
         i += 1
         alpha = calculateAlpha(model, observedSeq)
         beta = calculateBeta(model, observedSeq)
@@ -153,22 +170,24 @@ def estimateModel(observedSeq, num_hidden_states, num_observeable_states):
         
         newP = probOfObservations(model, observedSeq)
         iterProb.append(newP)
-        print("P %d: %.2e"%( i, newP))
+
+        if verbose:
+            print("P %d: %.2e"%( i, newP))
 
         if math.isclose(lastP, newP):
             converged = True
         
         lastP = newP
 
-    return iterProb
+    return model.pi, model.m, model.e, iterProb
 
 if __name__ =="__main__":
-    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2]
-    hidden = 12
+    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1]
+    hidden = 50
     observeable = 5
 
     for i in range(5):
-        probs = estimateModel(observedSeq, hidden, observeable) 
+        _, _, _, probs = estimateModel(observedSeq, hidden, observeable, verbose=True) 
         plt.plot(probs, color='C%d'%i)
     plt.ylabel('p(path|model)')
     plt.yscale('log')
