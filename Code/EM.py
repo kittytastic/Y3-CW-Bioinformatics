@@ -74,6 +74,11 @@ class Model():
 
         return outS
 
+def logAddExp(*args):
+    tmp = np.array(args)
+    return np.log(np.sum(np.exp(tmp)))
+
+
 def createInitialModel(hidden_states, observeable_states):
     #pi = np.ones(hidden_states)
     #pi /= hidden_states
@@ -88,12 +93,15 @@ def createInitialModel(hidden_states, observeable_states):
 
     pi = np.random.rand(hidden_states)
     pi /= pi.sum()
+    pi = np.log(pi)
 
     m = np.random.rand(hidden_states, hidden_states)
     m /= np.expand_dims(m.sum(axis=1), axis=1)
+    m = np.log(m)
 
     e = np.random.rand(hidden_states, observeable_states)
     e /= np.expand_dims(e.sum(axis=1), axis=1)
+    e = np.log(e)
 
     return Model(pi, m, e)
 

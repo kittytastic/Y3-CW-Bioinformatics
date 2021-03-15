@@ -3,6 +3,7 @@ import unittest
 from EM import *
 import numpy as np
 
+LOG_1 = 0
 
 class TestModelCreate(unittest.TestCase):
     hidden = 5
@@ -11,19 +12,20 @@ class TestModelCreate(unittest.TestCase):
     
     def test_pi(self):
         self.assertEqual(self.model.pi.shape, (self.hidden,))
-        self.assertAlmostEqual(np.sum(self.model.pi), 1)
+        #self.assertAlmostEqual(np.log(np.sum(np.exp(self.model.pi))), 0)
+        self.assertAlmostEqual(logAddExp(self.model.pi), LOG_1)
 
     def test_m(self):
         self.assertEqual(self.model.m.shape, (self.hidden, self.hidden))
         
         for i in range(self.hidden):
-            self.assertAlmostEqual(np.sum(self.model.m[i]), 1)
+            self.assertAlmostEqual(logAddExp(self.model.m[i]), LOG_1)
 
     def test_e(self):
-        self.assertAlmostEqual(self.model.e.shape, (self.hidden, self.observe))
+        self.assertEqual(self.model.e.shape, (self.hidden, self.observe))
 
         for i in range(self.hidden):
-            self.assertAlmostEqual(np.sum(self.model.e[i]), 1)
+            self.assertAlmostEqual(logAddExp(self.model.e[i]), LOG_1)
 
     def test_meta(self):
         self.assertEqual(self.model.hidden, self.hidden)
