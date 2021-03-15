@@ -118,11 +118,11 @@ class TestCalcGamma(unittest.TestCase):
 
         # Gamma values are normalized over each timestep
         # To avoid normalising in test check ratio between expected and calc vals
-        unnorm_v1 = alpha[0,0] * beta[0,0]
-        unnorm_v2 = alpha[0,1] * beta[0,1]
+        unnorm_v1 = alpha[0,0] + beta[0,0]
+        unnorm_v2 = alpha[0,1] + beta[0,1]
 
-        r1 = unnorm_v1/unnorm_v2
-        r2 = gamma[0,0]/gamma[0,1]
+        r1 = unnorm_v1-unnorm_v2
+        r2 = gamma[0,0]-gamma[0,1]
         
         self.assertAlmostEqual(r1, r2)
     
@@ -134,7 +134,7 @@ class TestCalcGamma(unittest.TestCase):
         gamma = calculateGamma(self.model, obsStates, alpha, beta)
 
         for i in range(self.observe):
-            self.assertAlmostEqual(np.sum(gamma[i]), 1)
+            self.assertAlmostEqual(logAddExp(gamma[i]), LOG_1)
 
 
 class TestCalcXi(unittest.TestCase):

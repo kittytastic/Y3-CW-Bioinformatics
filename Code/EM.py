@@ -139,12 +139,12 @@ def calculateBeta(model, observedSeq):
     return beta
 
 def calculateGamma(model, observedSeq, alpha, beta):
-    gamma = np.zeros((len(observedSeq), model.hidden))
+    gamma = np.ones((len(observedSeq), model.hidden))
 
-    gamma = alpha * beta
+    gamma = alpha + beta
 
     for t in range(len(observedSeq)):
-        gamma[t] /= np.sum(gamma[t])
+        gamma[t] -= logAddExp(alpha[t]+beta[t])
 
     return gamma
 
