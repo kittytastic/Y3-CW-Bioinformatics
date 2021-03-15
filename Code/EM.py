@@ -109,7 +109,7 @@ def calculateAlpha(model, observedSeq):
     alpha = np.zeros((len(observedSeq), model.hidden))
 
     # Base case: alpha_1(i) = pi_i * e_i(O_1)
-    alpha[0] = model.pi * model.e[:, observedSeq[0]]
+    alpha[0] = model.pi + model.e[:, observedSeq[0]]
     
 
     # Inductive case: alpha_{t+1}(j) = [\sigma_{i=1}^N alpha_t(i) m_ij ] * e_i(O_1)
@@ -118,7 +118,7 @@ def calculateAlpha(model, observedSeq):
         for j in range(model.hidden):
             m__j = model.m[:,j]
             a_t = alpha[t-1]
-            alpha[t, j] = np.sum(a_t*m__j)*model.e[j, observedSeq[t]]
+            alpha[t, j] = logAddExp(a_t+m__j)+model.e[j, observedSeq[t]]
         
 
     return alpha

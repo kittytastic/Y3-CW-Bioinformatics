@@ -40,34 +40,34 @@ class TestCalcAlpha(unittest.TestCase):
         obsStates = [0,1,2]
         alpha = calculateAlpha(self.model, [0,1,2])
         
-        self.assertEqual(alpha[0,0], self.model.pi[0]*self.model.e[0, obsStates[0]])
-        self.assertEqual(alpha[0,1], self.model.pi[1]*self.model.e[1, obsStates[0]])
+        self.assertEqual(alpha[0,0], self.model.pi[0]+self.model.e[0, obsStates[0]])
+        self.assertEqual(alpha[0,1], self.model.pi[1]+self.model.e[1, obsStates[0]])
 
     def test_base_case_sum_1(self):
-        summed = 0
-        for i in range(self.observe):
+        initial_alphas = []
+        for i in range(self.observe): # alpha[0] = initial*obs[0], sum across all obs
             alpha = calculateAlpha(self.model, [i])
-            summed += np.sum(alpha[0])
+            initial_alphas.append(logAddExp(alpha[0]))
 
-        self.assertAlmostEqual(summed, 1)
+        self.assertAlmostEqual(logAddExp(initial_alphas), LOG_1)
 
     def test_inductive_case(self):
         obsStates = [0,1,2]
         alpha = calculateAlpha(self.model, [0,1,2])
         
         j = 0
-        expected = np.sum(alpha[0]*self.model.m[:,j])*self.model.e[j, obsStates[1]]
+        expected = logAddExp(alpha[0]+self.model.m[:,j])+self.model.e[j, obsStates[1]]
         self.assertEqual(alpha[1,0], expected)
         
     def test_inductive_case_sum_1(self):
         
-        summed = 0
+        all_alphas = []
         for i in range(self.observe):
             for j in range(self.observe):
                 alpha = calculateAlpha(self.model, [i, j])
-                summed += np.sum(alpha[1])
+                all_alphas.append(logAddExp(alpha[1]))
 
-        self.assertAlmostEqual(summed, 1.0)
+        self.assertAlmostEqual(logAddExp(all_alphas), LOG_1)
 
 
 class TestCalcBeta(unittest.TestCase):
