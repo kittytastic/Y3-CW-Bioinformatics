@@ -10,3 +10,11 @@ This overhead is likely a function of the number of threads and could explain th
 We also see that $f$ decreases with more bodies. In my implementation some of the calculations with runtime $O(n)$ are done in series (where $n$ is number of bodies); However, all calculations with runtime $O(n^2)$ are done in parallel. Hence we would expect f to decrease as $O(n^2)$ dominates.
 
 \subsection{}
+
+\begin{figure}[h!]
+    \begin{center}
+    \includegraphics[scale=0.6]{EM.png}
+      \caption{step 1 (blue) step 3 (orange). Change in errors for a 2 body system under extreme conditions (near collision).}
+      \label{fig:convergence}
+    \end{center}
+    \end{figure}
