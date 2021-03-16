@@ -6,6 +6,57 @@ import matplotlib.pyplot as plt
 import math
 
 
+'''
+Main function:
+
+Runs the Baum-Welch Algorithm until model reaches a local optimum
+
+Arg:
+    observedSeq: The observed sequence as a List of integers
+    numHiddenStates: The number of hidden states in the model as an integer
+    numObserveableStates: The size of the alphabet as an integer
+    verbose (optional): default verbose=False
+
+Returns (as tuple):
+    [0] Initial Probabilites: numpy array (1D) 
+    [1] Transition Probabilites: numpy array (2D) indexed as [from state si, to state sj]
+    [2] Emission Probabilities: numpy array (2D) indexed as [from state si, to symbol l]
+    [3] p(observation|model) for all iterations of the model: List
+'''
+
+def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=False):
+
+    model = createInitialModel(numHiddenStates, numObserveableStates)
+    if verbose:
+        print("P initial: %.2f"%probOfObservations(model, observedSeq))
+    
+
+    iterProb = []
+    lastP = 0.0
+    iterProb.append(lastP)
+    i = 0
+    converged = False
+    while not converged:
+        i += 1
+        alpha = calculateAlpha(model, observedSeq)
+        beta = calculateBeta(model, observedSeq)
+        gamma = calculateGamma(model, observedSeq, alpha, beta)
+        xi = calculateXi(model, observedSeq, alpha, beta, gamma)
+        model = iterateModel(model, observedSeq, gamma, xi)
+        
+        newP = probOfObservations(model, observedSeq)
+        iterProb.append(newP)
+
+        if verbose:
+            print("P %d: %.2e"%( i, newP))
+
+        if math.isclose(lastP, newP):
+            converged = True
+        
+        lastP = newP
+
+    return model.pi, model.m, model.e, iterProb
+
 class Model():
     def __init__(self, pi, m, e):
         self.pi = pi # [hidden]
@@ -129,57 +180,6 @@ def probOfObservations(model, observedSeq):
     alpha = calculateAlpha(model, observedSeq)
     p = np.sum(alpha[-1])
     return p
-
-'''
-Main function:
-
-Runs the Baum-Welch Algorithm until model reaches a local optimum
-
-Arg:
-    observedSeq: The observed sequence as a List of integers
-    numHiddenStates: The number of hidden states in the model as an integer
-    numObserveableStates: The size of the alphabet as an integer
-    verbose (optional): default verbose=False
-
-Returns (as tuple):
-    [0] Initial Probabilites: numpy array (1D) 
-    [1] Transition Probabilites: numpy array (2D) indexed as [from state si, to state sj]
-    [2] Emission Probabilities: numpy array (2D) indexed as [from state si, to symbol l]
-    [3] p(observation|model) for all iterations of the model: List
-'''
-
-def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=False):
-
-    model = createInitialModel(numHiddenStates, numObserveableStates)
-    if verbose:
-        print("P initial: %.2f"%probOfObservations(model, observedSeq))
-    
-
-    iterProb = []
-    lastP = 0.0
-    iterProb.append(lastP)
-    i = 0
-    converged = False
-    while not converged:
-        i += 1
-        alpha = calculateAlpha(model, observedSeq)
-        beta = calculateBeta(model, observedSeq)
-        gamma = calculateGamma(model, observedSeq, alpha, beta)
-        xi = calculateXi(model, observedSeq, alpha, beta, gamma)
-        model = iterateModel(model, observedSeq, gamma, xi)
-        
-        newP = probOfObservations(model, observedSeq)
-        iterProb.append(newP)
-
-        if verbose:
-            print("P %d: %.2e"%( i, newP))
-
-        if math.isclose(lastP, newP):
-            converged = True
-        
-        lastP = newP
-
-    return model.pi, model.m, model.e, iterProb
 
 if __name__ =="__main__":
     observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1]
