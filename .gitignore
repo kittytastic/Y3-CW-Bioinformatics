@@ -3,6 +3,10 @@
 *.fls
 *.log
 *.synctex.gz
+*.bbl
+*.bcf
+*.blg
+*.run.xml
 
 *temp*
 
