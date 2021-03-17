@@ -1,10 +1,15 @@
-All data was collected from runs on a Hamilton par7.q node.
+\subsection{}
+The \algo{BUILD} algorithm builds a rooted tree from a set of constraints on leaves if possible. The constraints used are of the form $(i,j)<(k,l)$. $(x,y)$ denotes the lowest common ancestor of $x$ and $y$ where we can assume $x \neq y$. $(i,j)<(k,l)$ denotes that $(i,j)$ is a proper descendant of $(k,l)$ i.e. $(i,j)$ is further from the root than $(k,l)$. A set of these constraints can be used to build a tree, however it is not always possible to build a tree from a set of constraints.
 
-Figure [Fig.\ref{fig:scaling}] shows the scaling characteristics of step 4 in terms of the number of bodies. 
-We see from [Fig.\ref{fig:scaling_sub}] that scenarios with over 1000 bodies scale well to Hamilton's 24 cores, whereas models using $<$1000 bodies scale less well. 
-If we assume this is a strong scaling model, following $t(p) = f \cdot t(1) + (1-f)\cdot \frac{t(1)}{p}$, we can calculate constant $f$ for each data point [Fig.\ref{fig:scaling_f}]. We can see scenarios with $>=500$ bodies are modeled well by the strong scaling model as there is a low variance of $f$ estimations, giving evidence that $f$ is a constant. 
-However, the strong scaling model breaks down under $500$ bodies as $f$ is likely not constant. 
-I suspect this breakdown is caused by the overhead for OMP to create and synchronize threads. 
-This overhead is likely a function of the number of threads and could explain the speedup then slowdown for $200$ bodies.
-We also see that $f$ decreases with more bodies. In my implementation some of the calculations with runtime $O(n)$ are done in series (where $n$ is number of bodies); However, all calculations with runtime $O(n^2)$ are done in parallel. Hence we would expect f to decrease as $O(n^2)$ dominates.
+The \algo{BUILD} is a recursive algorithm where at every recursive step it aims to partition the current set of symbols (leaves) into subsets, which can then be  recused  into. Formalising this, given a set of symbols $T$ we want to partition $T$ into subsets $S_1, S_2, \cdot, S_r$ where $r \geq 2$. To create these subsets we observe two conditions that subsets must follow for a constraint $(i,j)<(k,l)$.
+(1) $i$ and $j$ must be in the same set. Otherwise $(i, j)$ cannot be a proper descendant of $(k,l)$.
+(2) Either $k$ and $l$ are in different sets (so $(k,l)$ is the root). Or $i,j,k,l$ are in the same set (so the constraint is dealt with in a future recursive call). If $k$ and $l$ are in the same set that isn't the same set as $i,j$ are in then $(i,j)$ and $(k,l)$ are siblings, hence not holding the constraint.
+
+Given we partition symbols into subsets it seems natural that we also partition constraints so that recursive steps need not filter the constraints to find those that are applicable given the current set of symbols. There are 2 different cases arising from the possible partitioning of symbols.
+(1) $k,l$ are in the same subset hence we have a subset $i,j,k,l$. This doesn't yet fulfill our constraint so the constraint needs to be included in the partition.
+(2) $k,l$ are in different sets implying $(k,l)$ is the root and $(i,j)$ is a child. As we have satisfied the constraint, and no recursive step can invalidate the constraint, it does not need to be included in the partition. I.e. the constraint has been fulfilled and can be ignored in further recursive steps.
+
+With this constraint partition scheme it becomes easy to see that if we are only able to partition the symbols into one set then we cannot create a tree. A recursive step will not eliminate any conditions nor create subsets of symbols hence will not aid in making a tree (as it is impossible), ultimately leading inductively to an infinite loop.
+
+With these methods for partitioning symbols and constraint we have all the tools we need to define the \algo{BUILD} algorithm. The recursive \algo{BUILD} function will taken in as arguments a set of symbols and constraints. It will return a tree. As a base case a single symbol is returned as a single node tree. At every step we partition symbols and constraints using the rules as described above. If we find the partition only creates one set of symbols then we know there is no tree that satisfies these constraints, hence that error can be propagated back through the recursion, for example by returning a null tree. If there is no error we can recurse into each subset pair of symbols and constraints. These recursive calls will return subtrees for each child.These child subtrees can be gathering under a new root node into a full tree which is then returned.    
 
