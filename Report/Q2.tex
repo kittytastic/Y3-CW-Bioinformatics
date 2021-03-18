@@ -11,5 +11,42 @@ Given we partition symbols into subsets it seems natural that we also partition 
 
 With this constraint partition scheme it becomes easy to see that if we are only able to partition the symbols into one set then we cannot create a tree. A recursive step will not eliminate any conditions nor create subsets of symbols hence will not aid in making a tree (as it is impossible), ultimately leading inductively to an infinite loop.
 
-With these methods for partitioning symbols and constraint we have all the tools we need to define the \algo{BUILD} algorithm. The recursive \algo{BUILD} function will taken in as arguments a set of symbols and constraints. It will return a tree. As a base case a single symbol is returned as a single node tree. At every step we partition symbols and constraints using the rules as described above. If we find the partition only creates one set of symbols then we know there is no tree that satisfies these constraints, hence that error can be propagated back through the recursion, for example by returning a null tree. If there is no error we can recurse into each subset pair of symbols and constraints. These recursive calls will return subtrees for each child.These child subtrees can be gathering under a new root node into a full tree which is then returned.    
+With these methods for partitioning symbols and constraint we have all the tools we need to define the \algo{BUILD} algorithm. The recursive \algo{BUILD} function will taken in as arguments a set of symbols and constraints. It will return a tree. As a base case \algo{BUILD} on a single symbol is returned as a single node tree. At every step we conduct the partition step which partitions the symbols, using the rules as described above. If we find the partition only creates one set of symbols then we know there is no tree that satisfies these constraints, hence that error can be propagated back through the recursion, for example by returning a null tree. We can eliminate and partition constraints using the partitioned symbols and rules as described above. If there is no error we can recurse into each subset pair of symbols and constraints. These recursive calls will return subtrees for each child. These child subtrees can be gathering under a new root node into a full tree which is then returned.    
 
+\subsection{}
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwResult{ $\pi_C = S_1, S_2, \cdots, S_r$ }
+     set $Q$ as empty queue\;
+     set $\pi_C = \emptyset$\;
+     \tcc{iterate over all training examples}
+     \For{all leaves l}{
+         set $S[l]$ to set $\{l\}$\;
+         add $S[l]$ to $\pi_C$\;
+     }
+     \For{each leaf l mentioned in a constraint}{
+         set $L_l$ to an empty list\;
+     }
+     \For{each constraint $(i,j)<(k,l)$}{
+        let c be the implication $k \equiv l \implies i \equiv l$\;
+        add c to $L_{S[k]}$\;
+        add c to $L_{S[l]}$\;
+        add command $i \equiv j$ to $Q$\;
+     }
+     
+     \While{$Q$ is not empty}{
+        dequeue command $p \equiv q$ from $Q$\;
+        \If{$S[p]\neq S[q]$}{
+          let $L$ for the shorter of $L_{S[p]}$ and $L_{S[q]}$\;
+          \For{ each implication $u \equiv v \implies x \equiv y$ in L}{ 
+           \If{one of $u$ and v is in $S[p]$ and the other is in $S[q]$}{
+               add command $x \equiv y$ to $Q$\;
+           }
+          }
+          append $L_{S[p]}$ to $L_{S[q]}$\;
+          merge $S[p]$ and $S[q]$\;
+         }
+       }
+    
+     \caption{Partition Step}
+    \end{algorithm}
