@@ -20,33 +20,47 @@ With these methods for partitioning symbols and constraint we have all the tools
      set $Q$ as empty queue\;
      set $\pi_C = \emptyset$\;
      \tcc{iterate over all training examples}
-     \For{all leaves l}{
-         set $S[l]$ to set $\{l\}$\;
-         add $S[l]$ to $\pi_C$\;
+     \For{integer i as index leaves l}{
+        let $l$ be leaf $i$\;
+        set $S[i]$ to set $\{l\}$\;
+        add $S[i]$ to $\pi_C$\;
+        set $setID[l] = i$\;
      }
-     \For{each leaf l mentioned in a constraint}{
-         set $L_l$ to an empty list\;
+     \For{integer i as index of each leaf l mentioned in a constraint}{
+         set $L_i$ to an empty list\;
      }
      \For{each constraint $(i,j)<(k,l)$}{
         let c be the implication $k \equiv l \implies i \equiv l$\;
-        add c to $L_{S[k]}$\;
-        add c to $L_{S[l]}$\;
+        add c to $L_{setID[k]}$\;
+        add c to $L_{setID[l]}$\;
         add command $i \equiv j$ to $Q$\;
      }
      
      \While{$Q$ is not empty}{
         dequeue command $p \equiv q$ from $Q$\;
-        \If{$S[p]\neq S[q]$}{
-          let $L$ for the shorter of $L_{S[p]}$ and $L_{S[q]}$\;
+        let $S_p, S_q$ be $S[setID[p]]$ and $S[setID[p]]$ respectively\;
+        \If{$S_p\neq S_q$}{
+          let $L$ be the shorter of $L_{setID[p]}$ and $L_{setID[q]}$\;
           \For{ each implication $u \equiv v \implies x \equiv y$ in L}{ 
-           \If{one of $u$ and v is in $S[p]$ and the other is in $S[q]$}{
+           \If{one of $u$ and v is in $S_p$ and the other is in $S_q$}{
                add command $x \equiv y$ to $Q$\;
            }
           }
-          append $L_{S[p]}$ to $L_{S[q]}$\;
-          merge $S[p]$ and $S[q]$\;
+          append $L_{setID[q]}$ to $L_{setID[p]}$\;
+          update $setID[x]=setID[p]$ for all elements x in $S_q$\;
+          merge $S_q$ into $S_p$\;
+          remove $S_q$ from $\pi_c$\;
          }
        }
     
      \caption{Partition Step}
     \end{algorithm}
+
+\subsection{}
+\Tree[.IP [.NP [.Det \textit{the} ]
+               [.N\1 [.N \textit{package} ]]]
+          [.I\1 [.I \textsc{3sg.Pres} ]
+                [.VP [.V\1 [.V \textit{is} ]
+                           [.AP [.Deg \textit{really} ]
+                                [.A\1 [.A \textit{simple} ]
+                                      \qroof{\textit{to use}}.CP ]]]]]]
