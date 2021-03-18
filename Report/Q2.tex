@@ -57,10 +57,318 @@ With these methods for partitioning symbols and constraint we have all the tools
     \end{algorithm}
 
 \subsection{}
-\Tree[.IP [.NP [.Det \textit{the} ]
-               [.N\1 [.N \textit{package} ]]]
-          [.I\1 [.I \textsc{3sg.Pres} ]
-                [.VP [.V\1 [.V \textit{is} ]
-                           [.AP [.Deg \textit{really} ]
-                                [.A\1 [.A \textit{simple} ]
-                                      \qroof{\textit{to use}}.CP ]]]]]]
+
+Partition:
+${a, c, e, f, h, j, l, n}$
+${b, d, g, i}$
+${k, m}$
+
+\subsubsection{}
+\Tree[.
+\qroof{\textit{${a, c, e, f, h, j, l, n}$}}.
+\qroof{\textit{${b, d, g, i}$}}.
+\qroof{\textit{${k, m}$}}. ]
+
+\subsubsection{}
+\Tree [.
+    [.
+        \qroof{\textit{${a, c, h}$}}.
+        \qroof{\textit{${e, f}$}}.
+        \qroof{\textit{${j, l, n}$}}.
+    ] !{\qframesubtree}
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+    ]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            \qroof{\textit{${c, h}$}}.
+            a
+        ] !{\qframesubtree}
+        \qroof{\textit{${e, f}$}}.
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ] !{\qframesubtree}
+            a
+        ]
+        \qroof{\textit{${e, f}$}}.
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ] !{\qframesubtree}
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ] !{\qframesubtree}
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            \qroof{\textit{${j, n}$}}.
+            l
+        ]!{\qframesubtree}
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]!{\qframesubtree}
+            l
+        ]
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        \qroof{\textit{${b, g}$}}.
+        \qroof{\textit{${d, i}$}}.
+    ]!{\qframesubtree}
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]!{\qframesubtree}
+        \qroof{\textit{${d, i}$}}.
+    ]
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]
+        [.
+            d
+            i
+        ]!{\qframesubtree}
+    ]
+    \qroof{\textit{${k, m}$}}.
+]
+
+\subsubsection{}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]
+        [.
+            d
+            i
+        ]
+    ]
+    [.
+        k
+        m
+    ]!{\qframesubtree}
+]
+
+\subsubsection{Final tree}
+\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]
+        [.
+            d
+            i
+        ]
+    ]
+    [.
+        k
+        m
+    ]
+]
+        
