@@ -7,7 +7,7 @@ contract = [
     #['d','e','a','b'],
 ]
 '''
-
+'''
 contract = [
     ['a', 'c', 'b', 'e'],
     ['a', 'd', 'c', 'g'],
@@ -18,18 +18,50 @@ contract = [
     ['g', 'h', 'g', 'j'],
     ['h', 'j', 'e', 'i'],
 ]
+'''
 
-leaf_max = 10
+'''
+char_set = set(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'])
+contract = [
+    ['e', 'f', 'k', 'd'],
+    ['c', 'h', 'a', 'n'],
+    ['j', 'n', 'j', 'l'],
+    ['c', 'a', 'f', 'h'],
+    ['j', 'l', 'e', 'n'],
+    ['n', 'l', 'a', 'f'],
+    ['d', 'i', 'k', 'n'],
+    ['d', 'i', 'g', 'i'],
+    ['c', 'l', 'g', 'k'],
+    ['g', 'b', 'g', 'i'],
+    ['g', 'i', 'd', 'm'],
+    ['c', 'h', 'c', 'a'],
+    ['e', 'f', 'h', 'l'],
+    ['j', 'l', 'j', 'a'],
+    ['k', 'm', 'e', 'i'],
+    ['j', 'n', 'j', 'f'],
+]
+'''
+
+'''
+char_set = set(['a', 'c', 'e', 'f', 'h', 'j', 'l', 'n'])
+contract = [['c', 'h', 'a', 'n'], ['j', 'n', 'j', 'l'], ['c', 'a', 'f', 'h'], ['j', 'l', 'e', 'n'], ['n', 'l', 'a', 'f'], ['c', 'h', 'c', 'a'], ['e', 'f', 'h', 'l'], ['j', 'l', 'j', 'a'], ['j', 'n', 'j', 'f']]
+'''
+
+char_set = set(['b', 'd', 'g', 'i'])
+contract = [['d', 'i', 'g', 'i'], ['g', 'b', 'g', 'i']]
+
+#leaf_max = 14
 
 
-S = [None] * leaf_max
-L = [None] * leaf_max
+S = [None] * len(char_set)
+L = [None] * len(char_set)
 set_id = {}
 
 Q = []
 
-for i in range(leaf_max):
-    l = chr(97+i)
+for i, l in enumerate(char_set):
+#for i in range(leaf_max):
+    #l = chr(97+i)
     S[i] = set(l)
     L[i] = []
     set_id[l] = i
@@ -89,8 +121,30 @@ while len(Q) > 0:
         print("after set_id: ", set_id)
 
 
+def renormalise_contract(leaf_set, contract):
+    c_map = {char:chr(97+i) for i, char in enumerate(leaf_set)}
+    #print("Mapping: ",c_map)
+    new_contract = [None]*len(contract)
+    for i in range(len(contract)):
+        new_contract[i] = [None]*4
+        for j in range(4):
+            new_contract[i][j] = c_map[contract[i][j]]
+
+    return new_contract
+
+
 print()
 print("Final sets")
-for i in range(leaf_max):
+for i in range(len(char_set)):
     if S[i]!=None:
-        print(S[i])
+        print("Subset: ",sorted(list(S[i])))
+
+        new_rules = []
+        for c in contract:
+            if S[i].issuperset(set(c)):
+                new_rules.append(c)
+
+        #print("L: ",L[i])
+        #print("R: ",new_rules)
+        #n = renormalise_contract(S[i], new_rules)
+        print("Constraints: ", new_rules)
