@@ -1,0 +1,323 @@
+\newcommand{\treeStepA}{\Tree[.
+\qroof{\textit{${a, c, e, f, h, j, l, n}$}}.
+\qroof{\textit{${b, d, g, i}$}}.
+\qroof{\textit{${k, m}$}}. ]}
+
+\newcommand{\treeStepB}{\Tree [.
+    [.
+        \qroof{\textit{${a, c, h}$}}.
+        \qroof{\textit{${e, f}$}}.
+        \qroof{\textit{${j, l, n}$}}.
+    ] !{\qframesubtree}
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+    ]}
+
+
+\newcommand{\treeStepC}{\Tree [.
+    [.
+        [.
+            \qroof{\textit{${c, h}$}}.
+            a
+        ] !{\qframesubtree}
+        \qroof{\textit{${e, f}$}}.
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepD}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ] !{\qframesubtree}
+            a
+        ]
+        \qroof{\textit{${e, f}$}}.
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepE}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ] !{\qframesubtree}
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepF}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ] !{\qframesubtree}
+        \qroof{\textit{${j, l, n}$}}.
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepG}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            \qroof{\textit{${j, n}$}}.
+            l
+        ]!{\qframesubtree}
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepH}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]!{\qframesubtree}
+            l
+        ]
+    ] 
+    \qroof{\textit{${b, d, g, i}$}}.
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepI}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        \qroof{\textit{${b, g}$}}.
+        \qroof{\textit{${d, i}$}}.
+    ]!{\qframesubtree}
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepJ}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]!{\qframesubtree}
+        \qroof{\textit{${d, i}$}}.
+    ]
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepK}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]
+        [.
+            d
+            i
+        ]!{\qframesubtree}
+    ]
+    \qroof{\textit{${k, m}$}}.
+]}
+
+
+\newcommand{\treeStepL}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]
+        [.
+            d
+            i
+        ]
+    ]
+    [.
+        k
+        m
+    ]!{\qframesubtree}
+]}
+
+
+\newcommand{\finalTree}{\Tree [.
+    [.
+        [.
+            [.
+                c
+                h
+            ]
+            a
+        ]
+        [.
+            e
+            f
+        ]
+        [.
+            [.
+                j
+                n
+            ]
+            l
+        ]
+    ] 
+    [.
+        [.
+            b
+            g
+        ]
+        [.
+            d
+            i
+        ]
+    ]
+    [.
+        k
+        m
+    ]
+]}
+
+
+
+
+\newcommand{\treeSplitPage}[2]{
+\begin{minipage}{0.7\textwidth}
+    #1
+    \end{minipage} \hfill
+\begin{minipage}{0.25\textwidth}
+    #2
+    \end{minipage}
+}
+
+\newcommand{\stepArgs}[2]{
+    \textbf{S}: #1 \\
+    \textbf{C}: #2
+}
