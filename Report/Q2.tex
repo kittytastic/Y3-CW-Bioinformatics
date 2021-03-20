@@ -121,6 +121,7 @@ construct $(l_1^k, l_1^{k+1}) < (l_1^k, *)$. Where $*$ represents a yet undecide
 
 
 \begin{algorithm}[H]
+    \LinesNumbered
     \SetAlgoLined
     \KwIn{tree $T$}
     \KwOut{ set of constraints $C$ }
@@ -130,7 +131,7 @@ construct $(l_1^k, l_1^{k+1}) < (l_1^k, *)$. Where $*$ represents a yet undecide
      \For{subtree $s$ of $T$}{
         let $c=$ \algo{REVERSE BUILD STEP}$(s)$\;
         update $c$ so any undecided leafs $*$ are replaced by leaf $x$ where $x \in T - s$\;
-        update $C$ to contain $c$\;
+        update $C$ to contain $c$\label{alg:fProof}\;
      }
      
      let $a = \{(l_1^k, l_1^{k+1}) < (l_1^k, *)|k<N-1\}$\;
@@ -151,4 +152,40 @@ construct $(l_1^k, l_1^{k+1}) < (l_1^k, *)$. Where $*$ represents a yet undecide
      \Return{$C$}
      \caption{REVERSE BUILD}
 \end{algorithm}
-        
+
+ The first part of the proof will prove that the set of constraints $c$ built on line \ref{alg:fProof} of \algo{REVERSE BUILD STEP} is sufficient to preform the following transformation which could be through of as the de-partitioning of $l$.
+
+\textbf{From}
+ \Tree [.
+    [. 
+        \qroof{\textit{$l_1^1, l_2^1, \dots, l_{n_1}^1 $}}.
+        \ldots.
+        \qroof{\textit{$l_1^N, \ldots$}}.
+    ]
+    \ldots.
+    \qroof{\textit{$\subseteq T-l$}}.
+    ]
+
+\textbf{To}
+\Tree [. 
+    \qroof{\textit{$l = l_1^1, l_2^1, \dots, l_{n_N}^N $}}.
+    \ldots.
+    \qroof{\textit{$\subseteq T-l$}}.
+]
+
+Note $(i, j) < (k, l)$ means $k \equiv l \implies i \equiv l$ and $i \equiv j$
+
+Let us redefine define the unknown leaf $*$ as $x$  $x\subset T-l$.
+\algo{REVERSE BUILD STEP} creates constraints $(l_1^1, l_1^2) < (l_1^1, x)$, $(l_1^2, l_1^3) < (l_1^2, x)$, \ldots. It is clear to see that these constraints can only be satifed if a pair $l_1^k, l_1^{k+1}$ is a subtree of T. Next we will prove that all these paris are in the \textbf{same} subtree of T. Each pair have implications $l_1^1 \equiv l_1^2$, $l_1^2 \equiv l_1^3$, \ldots. Which can be simplified down to $l_1^1 \equiv l_1^2 \equiv l_1^3 \equiv \ldots$ which is equivelent to $l^1 \equiv l^2 \equiv l^3 \equiv \ldots$ where ommision of the intra subset index implies the whole subset. Hence we have proved all $l$ are in the same subset of the tree.
+
+
+Next we will prove inductively that the \algo{REVERSE BUILD STEP} will return a set of constraint that can be used to reconstruct an isomorphic copy of $T$ which we will call $R$. As the set of constraints contain constraints with an undetermined leaf we will provide a dummy leaf $x$ and take $R$ as follows:
+
+\Tree [. 
+    $R$
+    $x$
+]
+
+\textbf{Base case:} Tree $T$ of height 1 that contains a single root node and leaves $y_1, \ldots, y_n$. Running \algo{REVERSE BUILD STEP} on this tree then ignoring constraints with undetermined leafs will give us the empty set of constraints. Which will build tree T. 
+
+\textbf{Inductive case:} Tree $T$ of height $h$. $T$ is made up of $N$ subtrees $s$. Inductiveely \algo{REVERSE BUILD STEP} on the subtrees return a contain returns a set of constrains used to build $s$ and a set of constrains with undecided leaves. From the proof of  line:\ref{alg:fProof} we know that the substituting in $x$ to the incomplete constraints from a subtree will ensure all the subtrees of $s$ share the same parent node i.e. create the unified set $l$. Doing this for all values of $s$ will introduce $N$ subtrees in $R$ where each subtree is $s$. Hence, $R=T$.  
