@@ -19,7 +19,7 @@ With these methods for partitioning symbols and constraint we have all the tools
     \KwResult{ $\pi_C = S_1, S_2, \cdots, S_r$ }
      set $Q$ as empty queue\;
      set $\pi_C = \emptyset$\;
-     \tcc{iterate over all training examples}
+     %\tcc{iterate over all training examples}
      \For{integer i as index leaves l}{
         let $l$ be leaf $i$\;
         set $S[i]$ to set $\{l\}$\;
@@ -103,4 +103,52 @@ With these methods for partitioning symbols and constraint we have all the tools
 
 \subsubsection*{Final tree}
 \finalTree
+
+\subsection{}
+\subsubsection*{}
+
+$l^j_i$ denotes leaf $i$ in subtree $j$.
+$n_j$ denotes number of leaves in subtree j.
+$N$ denotes number of subtrees.
+\Tree [. 
+    \qroof{\textit{$l_1^1, l_2^1, \dots, l_{n_1}^1 $}}.
+    \qroof{\textit{$l_1^2, l_2^2, \dots, l_{n_2}^2 $}}.
+    \ldots.
+    \qroof{\textit{$l_1^N, \ldots$}}.
+]
+
+construct $(l_1^k, l_1^{k+1}) < (l_1^k, *)$. Where $*$ represents a yet undecided leaf.
+
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwIn{tree $T$}
+    \KwOut{ set of constraints $C$ }
+     set $C=\emptyset$\;
+     define leaves $l$ as previously described for tree $T$\;
+     define $N$ as the number of subtrees of tree $T$\;
+     \For{subtree $s$ of $T$}{
+        let $c=$ \algo{REVERSE BUILD STEP}$(s)$\;
+        update $c$ so any undecided leafs $*$ are replaced by leaf $x$ where $x \in T - s$\;
+        update $C$ to contain $c$\;
+     }
+     
+     let $a = \{(l_1^k, l_1^{k+1}) < (l_1^k, *)|k<N-1\}$\;
+     update $C$ to contain $a$\;
+    
+     \Return{$C$}
+     \caption{REVERSE BUILD STEP}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwIn{tree $T$}
+    \KwOut{ set of constraints $C$ }
+     
+    let $C=$ \algo{REVERSE BUILD STEP}$(T)$\;
+    update $C$ to remove any constrains containing undecided leaves $*$.
+     
+     \Return{$C$}
+     \caption{REVERSE BUILD}
+\end{algorithm}
         
