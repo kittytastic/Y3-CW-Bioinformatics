@@ -56,14 +56,15 @@ With these methods for partitioning symbols and constraint we have all the tools
      \caption{Partition Step}
     \end{algorithm}
 
+\pagebreak
 \subsection{}
 
 \input{Q2Tree}
 
-\subsubsection{}
+\treeSplitPage{\begin{center}\textbf{Output}\end{center}}{\textbf{Input}}
+
 \treeSplitPage{\treeStepA}{\stepArgs{a-n}{as in question}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepB}{\stepArgs{a,c,e,f,h,j,l,n}{
     \\
     $(c, h) < (a, n)$ 
@@ -77,38 +78,29 @@ With these methods for partitioning symbols and constraint we have all the tools
     $(j, n) < (j, f)$
 }}
 
-\subsubsection{}
 \treeSplitPage{\treeStepC}{\stepArgs{a,c,h}{\\$(c, h) < (c, a)$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepD}{\stepArgs{c,h}{$\emptyset$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepE}{\stepArgs{e,f}{$\emptyset$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepF}{\stepArgs{j,n,l}{\\$(j, n) < (j, l)$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepG}{\stepArgs{j, n}{$\emptyset$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepH}{\stepArgs{b, d, g, i}{
     \\
     $(d, i) < (g, i)$
     $(g, b) < (g, i)$
 }}
 
-\subsubsection{}
 \treeSplitPage{\treeStepI}{\stepArgs{b, g}{$\emptyset$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepJ}{\stepArgs{d, i}{$\emptyset$}}
 
-\subsubsection{}
 \treeSplitPage{\treeStepK}{\stepArgs{k, m}{$\emptyset$}}
 
 
-\subsubsection{Final tree}
+\subsubsection*{Final tree}
 \finalTree
         
