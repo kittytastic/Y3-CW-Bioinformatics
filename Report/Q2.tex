@@ -154,7 +154,7 @@ construct $(l_1^k, l_1^{k+1}) < (l_1^k, *)$. Where $*$ represents a yet undecide
 \end{algorithm}
 
 
-Change this to prove that the set of incomplete constains can be used to departiton.
+
  The first part of the proof will show that we build constraints that can be used by \algo{BUILD} for partitioning, we will call this de-partitoning. De-partitioning can be thought of as the inverse of the \algo{BUILD} algorithms partition function. The de-partition algorithm preforms the following transfomation.
  
 \textbf{Input}
@@ -182,15 +182,7 @@ Let us redefine define the unknown leaf $*$ as $x$  $x\subset T-l$.
 \algo{REVERSE BUILD STEP} creates constraints $(l_1^1, l_1^2) < (l_1^1, x)$, $(l_1^2, l_1^3) < (l_1^2, x)$, \ldots. It is clear to see that these constraints can only be satifed if a pair $l_1^k, l_1^{k+1}$ is a subtree of T. Next we will prove that all these paris are in the \textbf{same} subtree of T. Each pair have implications $l_1^1 \equiv l_1^2$, $l_1^2 \equiv l_1^3$, \ldots. Which can be simplified down to $l_1^1 \equiv l_1^2 \equiv l_1^3 \equiv \ldots$ which is equivelent to $l^1 \equiv l^2 \equiv l^3 \equiv \ldots$ where ommision of the intra subset index implies the whole subset. Hence we have proved all $l$ are in the same subset of the tree.
 
 
-Next we will prove inductively, on the height of the input tree $T$, that the \algo{REVERSE BUILD STEP} will return a set of constraint that can be used to reconstruct an isomorphic copy of $T$ which we will call $R$. The recursive call that relates to a tree of height $k$ will recursive create a set of complete causes, used to describe that tree but also create incomplete clauses. These incomplete clauses are completed by and used by a tree of height $k+1$ to departition a tree of height $h$. Given that we want to prove facts about trees of height $h$ we can ignore incomplete clauses as they are only useful to a tree of $h+1$. To be explicit in the base case creating a tree of height $1$ incomplete clauses are only useful for trees of height $2$ and in an inductive case creating a tree of height $h+1$ incomplete clauses are only useful for tree of height $h+2$.
-
-
-\textbf{Base case:} Tree $T$ of height 1 that contains a single root node and leaves $y_1, \ldots, y_n$. Running \algo{REVERSE BUILD STEP} on this tree then ignoring incomplete constraints will give us the empty set of constraints. The \algo{BUILD} will build tree $R=T$. 
-
-\textbf{Inductive case:} Tree $T$ of height $h+1$. $T$ is made up of $N$ subtrees $s$. Inductively \algo{REVERSE BUILD STEP} on the subtrees return a contain returns a set of constrains used to build $s$ and a set of constrains with undecided leaves. From the proof of  line:\ref{alg:fProof} we know that the substituting in $x$ to the incomplete constraints from a subtree will ensure all the subtrees of $s$ share the same parent node i.e. create the unified set $l$. Doing this for all values of $s$ will introduce $N$ subtrees in $R$ where each subtree is $s$. Hence, $R=T$.  
-
-\textbf{Inductive case:} Creating a tree $R$ that is isomorphic of tree $T$ that has height $h+1$. Tree $T$ contains $N$ subtrees $s_1, \ldots, s_N$. A recursive call on $s_i$ will return a set of clauses that can be used to construct $s_i$ and a also constraints that can be used to departition $s_i$. To departiton $s_i$ you need to substitue in an incomplete parameter which you xan do. Build will partition the departiton hence make the tree we want. Also it will create incomplete clauses that can be used to departition $T$
-
+%what is R
 The second part will prove inductively 2 facts about \algo{REVERSE BUILD STEP} on a tree $T$ of height $h$. Firstly that the complete constraints can be used by \algo{BUILD} to make tree $R$ which is isomorphic to $T$. Secondly the set of incomplete constraints can be used by a parent recursive step to departiton $R$.
 
 \textbf{Base Case:} Tree $T$ of height $1$ i.e. $T$ is a single root node connected to $N$ leaves. \algo{REVERSE BUILD STEP}  will create an empty set of complete constraints. \algo{BUILD} will create $T$ on an empty set. Using the first part of the proof it is easy to see the incomplete clauses \algo{REVERSE BUILD STEP} will make can be completed by a parent recusive step to de-partition $T$
