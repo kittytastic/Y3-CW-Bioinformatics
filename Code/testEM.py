@@ -14,6 +14,10 @@ class TestSafeLogAdd(unittest.TestCase):
         x = np.array([5,2,3,4,5,6])
         self.assertAlmostEqual(np.exp(safeLogAdd(np.log(x))), np.sum(x))
 
+    def test_log_vs_real_zero(self):
+        x = np.array([0,2,3,4,5,6])
+        self.assertAlmostEqual(np.exp(safeLogAdd(np.log(x))), np.sum(x))
+
     def test_log_vs_real_large(self):
         x = np.random.rand(100000)*100
         self.assertAlmostEqual(np.exp(safeLogAdd(np.log(x))), np.sum(x))
@@ -215,7 +219,7 @@ class TestIterModel(unittest.TestCase):
 
         new_model = iterateModel(self.model, obsStates, gamma, xi)
         
-        self.assertAlmostEqual(np.sum(new_model.pi), 1.0)
+        self.assertAlmostEqual(safeLogAdd(new_model.pi), LOG_1)
 
     def test_m_sum_1(self):
         obsStates = [0,1,2,1,1]
@@ -227,7 +231,7 @@ class TestIterModel(unittest.TestCase):
 
         new_model = iterateModel(self.model, obsStates, gamma, xi)
         for i in range(self.hidden):
-            self.assertAlmostEqual(np.sum(new_model.m[i]), 1.0)
+            self.assertAlmostEqual(safeLogAdd(new_model.m[i]), LOG_1)
 
     def test_e_sum_1(self):
         obsStates = [0,1,1,1]
@@ -240,7 +244,7 @@ class TestIterModel(unittest.TestCase):
         new_model = iterateModel(self.model, obsStates, gamma, xi)
 
         for i in range(self.hidden):
-            self.assertAlmostEqual(np.sum(new_model.e[i]), 1.0)
+            self.assertAlmostEqual(safeLogAdd(new_model.e[i]), LOG_1)
 
 
 

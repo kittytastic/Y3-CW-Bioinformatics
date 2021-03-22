@@ -80,8 +80,13 @@ def logAddExp(*args):
 
 def safeLogAdd(x):
     assert(len(x.shape)==1)
-    y = x[1:] - x[0]
-    return x[0] + np.log1p(np.sum(np.exp(y)))
+    if len(x)==0:
+        return np.NINF
+    special = x.max()
+    i_special = x.argmax()
+    remaining = x[np.arange(len(x))!=i_special]
+    y = remaining - special
+    return special + np.log1p(np.sum(np.exp(y)))
 
 
 def createInitialModel(hidden_states, observeable_states):
@@ -175,27 +180,37 @@ def iterateModel(model, observedSeq, gamma, xi):
     # only sum over 0 -> T-1, easy for xi, fiddle for gamma
     m = np.sum(xi, axis=0)/np.expand_dims((np.sum(gamma, axis=0)-gamma[-1]), axis=1)
 
+    m = np.zeros((model.hidden, model.hidden))
+    for i in range(model.hidden):
+        for j in range(model.hidden):
+            xis = xi[:, i, j]
+            gammas = gamma[:-1, i]
+            assert(len(gammas) == len(gamma)-1)
+            m[i,j] = safeLogAdd(xis)-safeLogAdd(gammas)
+
     e = np.ones((model.hidden, model.observeable))
     for i in range(model.hidden):
         for k in range(model.observeable):
             gamma_ik_mask = np.where(np.array(observedSeq)==k, True, False)
-            gamma_ik = np.sum(gamma[:,i], where=gamma_ik_mask)
-            e[i,k]=gamma_ik
+            gamma_ik = gamma[:,i]
+            gamma_ik = gamma_ik[gamma_ik_mask]
+            e[i,k]=safeLogAdd(gamma_ik) - safeLogAdd(gamma[:,i])
         
-        e[i] /= np.sum(e[i])
+        #e[i] /= np.sum(e[i])
             
     
     return Model(pi, m, e)
 
 def probOfObservations(model, observedSeq):
     alpha = calculateAlpha(model, observedSeq)
-    p = np.sum(alpha[-1])
+    p = np.exp(safeLogAdd(alpha[-1]))
     return p
 
 if __name__ =="__main__":
-    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1]
+    #observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1]
+    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1]
     #observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3]
-    hidden = 6
+    hidden = 50
     observeable = 5
 
     for i in range(5):
