@@ -113,12 +113,12 @@ A tree can be thought of as containing $N$ subtrees which are all immediate chil
     \qroof{\textit{$l_1^2, l_2^2, \dots, l_{n_2}^2 $}}.
     \ldots.
     \qroof{\textit{$l_1^N, \ldots$}}.
-]
+]\\
 
-Constraint are of the form $(u,v)<(w,x)$ where $u,v,w,x$ are leaves, we call this a complete constraint as all leaves are defined. For this algorithm we also introduce a special constraint, called an incomplete constraint. This is of the form $(u, v)<(w, *)$ where $*$ denotes a leaf which has yet to be decided. Incomplete constraints are useful tool for creating clauses that depend on both a recursive step and its' parent recursive step.  
+Constraint are of the form $(u,v)<(w,x)$ where $u,v,w,x$ are leaves, we call this a complete constraint as all leaves are defined. For this algorithm we also introduce a special constraint, called an incomplete constraint. This is of the form $(u, v)<(w, *)$ where $*$ denotes a leaf which has yet to be decided. Incomplete constraints are useful tool for creating constraints that depend on both a recursive step and its' parent recursive step.  
 
 
-The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{RB}) and \algo{REVERSE BUILD STEP} (\algo{RBS}). The \algo{RBS} function is a recursive function that does all of the work. \algo{RB} is just used to remove any incomplete clauses in a final answers.
+The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{RB}) and \algo{REVERSE BUILD STEP} (\algo{RBS}). The \algo{RBS} function is a recursive function that does all of the work. \algo{RB} is just used to remove any incomplete constraints in a final answers.
 
 \begin{algorithm}[H]
     \LinesNumbered
@@ -155,7 +155,7 @@ The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{R
 
 
 
- The first part of the proof will show that we build constraints that can be used by \algo{BUILD} for partitioning, we will call this de-partitoning. De-partitioning can be thought of as the inverse of the \algo{BUILD} algorithms partition function. The de-partition algorithm preforms the following transfomation.
+ The first part of the proof will show that the constraints we create can be used by \algo{BUILD} for partitioning, we will call this de-partitioning. De-partitioning can be thought of as the inverse of the \algo{BUILD} algorithms' partition algorithm. De-partitioning can be visualised as preforming the following transformation.\\
  
 \textbf{Input}
  \Tree [.
@@ -173,19 +173,19 @@ The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{R
     \qroof{\textit{$l = l_1^1, l_2^1, \dots, l_{n_N}^N $}}.
     \ldots.
     \qroof{\textit{$\subseteq T-l$}}.
-]
+]\\
 %Note $(i, j) < (k, l)$ means $k \equiv l \implies i \equiv l$ and $i \equiv j$
 
-The de-partition algorithm is preformed across 2 recursive layers. First line:\ref{alg:make} creates a set of incomplete constraints. Next line:\ref{alg:fill} completes the constraints completing de-partitioning. To prove that these 2 steps will de-partition we will prove that the constraint created represent the transformation.
+The de-partition algorithm is preformed across 2 recursive layers. First line:\ref{alg:make} creates a set of incomplete constraints. Next line:\ref{alg:fill} completes the constraints completing de-partitioning. To prove that these 2 steps will de-partition we will prove that the constraint represent the aforementioned transformation.
 
-Let us set the unknown leaf $*$ as $x$ where $x\subset T-l$.
-\algo{REVERSE BUILD STEP} creates constraints $(l_1^1, l_1^2) < (l_1^1, x)$, $(l_1^2, l_1^3) < (l_1^2, x)$, \ldots. It is clear to see that these constraints can only be satisfied if a pair $l_1^k, l_1^{k+1}$ is a partition of T. Next we will prove that all these paris are in the same partition of T. Each pair have implications $l_1^1 \equiv l_1^2$, $l_1^2 \equiv l_1^3$, \ldots. Which can be simplified down to $l_1^1 \equiv l_1^2 \equiv l_1^3 \equiv \ldots$ which is equivalent to $l^1 \equiv l^2 \equiv l^3 \equiv \ldots$ where omission of the intra subset index implies the whole subset. Hence we have proved all $l$ are in the same partition of the tree.
+Let us set the unknown leaf $*$ to $x$ where $x\subset T-l$.
+\algo{RBS} creates constraints $(l_1^1, l_1^2) < (l_1^1, x)$, $(l_1^2, l_1^3) < (l_1^2, x)$, \ldots. It is clear to see that these constraints can only be satisfied if a pair $l_1^k, l_1^{k+1}$ are in the same partition of T. Next we will prove that all these paris are in the same partition of T. Each pair have implications $l_1^1 \equiv l_1^2$, $l_1^2 \equiv l_1^3$, \ldots. Which can be simplified down to $l_1^1 \equiv l_1^2 \equiv l_1^3 \equiv \ldots$ which is equivalent to $l^1 \equiv l^2 \equiv l^3 \equiv \ldots$ where omission of the intra subset index implies the whole subset. Hence we have proved all $l$ are in the same partition of the tree.
 
 
 %what is R
 The second part will inductively prove 2 facts about \algo{RBS} on a tree $T$ of height $h$. Firstly that the complete constraints can be used by \algo{BUILD} to make tree $R$ which is isomorphic to $T$. Secondly the set of incomplete constraints can be used by a parent recursive step to de-partition $R$.
 
-\textbf{Base Case:} Tree $T$ of height $1$ i.e. $T$ is a single root node connected to $N$ leaves. \algo{RBS}  will create an empty set of complete constraints. \algo{BUILD} will create $T$ using an empty set of constraints. Secondly, using the first part of the proof it is easy to see that the incomplete clauses \algo{RBS} makes, can be completed by a parent recursive step to de-partition $T$
+\textbf{Base Case:} Tree $T$ of height $1$ (i.e. $T$ is a single root node connected to $N$ leaves). \algo{RBS}  will create an empty set of complete constraints. \algo{BUILD} will create $T$ using an empty set of constraints. Secondly, using the first part of the proof it is easy to see that the incomplete constraints \algo{RBS} makes, can be completed by a parent recursive step to de-partition $T$.
 
-\textbf{Inductive Step:} Tree $T$ of height $h+1$ will have $N$ child trees $t_1, \ldots, t_N$ of height $h$. Inductively running \algo{RBS} on any subtree $t_k$ will return a set of complete and incomplete constraints. The first part of the proof shows we can complete the incomplete clauses so the \algo{BUILD} algorithm can partition $T$ into $t_1, \ldots, t_N$. \algo{BUILD} will not carry these completed clauses through while calling \algo{BUILD} on $t_k$. Hence \algo{BUILD} will only be run on $t_k$ with the set of complete clauses. Which inductively will create $t_k$. Hence as \algo{BUILD} will be able to partition and then recuse into the result of \algo{REVERSE BUILD STEP} the recreated tree will be isomorphic to $T$. Again using the first part of the proof it is easy to see that the set of incomplete clauses created on line:\algo{make} can be filled by a parent tree to create a de-partition. 
+\textbf{Inductive Step:} Tree $T$ of height $h+1$ will have $N$ child trees $t_1, \ldots, t_N$ of height $h$. Inductively running \algo{RBS} on any subtree $t_k$ will return a set of complete and incomplete constraints. The first part of the proof shows we can complete the incomplete constraints so the \algo{BUILD} algorithm can partition $T$ into $t_1, \ldots, t_N$. \algo{BUILD} will not carry these completed constraints through while calling \algo{BUILD} on $t_k$. Hence \algo{BUILD} will only be run on $t_k$ with the set of complete constraints. Which inductively will create $t_k$. Hence as \algo{BUILD} will be able to partition and then recuse into the result of \algo{REVERSE BUILD STEP} the recreated tree will be isomorphic to $T$. Again using the first part of the proof it is easy to see that the set of incomplete constraints created on line:\algo{make} can be filled by a parent tree to create a de-partition. 
 
