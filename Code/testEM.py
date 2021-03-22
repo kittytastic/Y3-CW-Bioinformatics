@@ -247,6 +247,27 @@ class TestIterModel(unittest.TestCase):
             self.assertAlmostEqual(safeLogAdd(new_model.e[i]), LOG_1)
 
 
+class TestMainFunction(unittest.TestCase):
+    hidden = 6
+    observe = 5
+    seq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1]
+    model = estimateModel(seq, hidden, observe)
+
+    def test_pi_sum_1(self):
+        pi = self.model[0]
+        self.assertAlmostEqual(np.sum(pi), 1)
+
+    def test_m_sum_1(self):
+       
+        m = self.model[1]
+        for i in range(self.hidden):
+            self.assertAlmostEqual(np.sum(m[i]), 1)
+
+    def test_e_sum_1(self):
+        e = self.model[2]
+        for i in range(self.hidden):
+            self.assertAlmostEqual(np.sum(e[i]), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

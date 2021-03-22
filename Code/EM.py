@@ -28,12 +28,13 @@ def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=Fa
 
     model = createInitialModel(numHiddenStates, numObserveableStates)
     if verbose:
-        print("P initial: %.2f"%probOfObservations(model, observedSeq))
+        lp = logProbOfObservations(model, observedSeq)
+        print("P initial: %.2e (log prob: %.2e)"%(np.exp(lp), lp))
     
 
     iterProb = []
-    lastP = 0.0
-    iterProb.append(lastP)
+    lastLogP = np.NINF
+    iterProb.append(np.exp(lastLogP))
     i = 0
     converged = False
     while not converged:
@@ -44,18 +45,19 @@ def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=Fa
         xi = calculateXi(model, observedSeq, alpha, beta, gamma)
         model = iterateModel(model, observedSeq, gamma, xi)
         
-        newP = probOfObservations(model, observedSeq)
-        iterProb.append(newP)
+        newLogP = logProbOfObservations(model, observedSeq)
+        iterProb.append(np.exp(newLogP))
 
         if verbose:
-            print("P %d: %.2e"%( i, newP))
+            print("P %d: %.2e   (log prob: %.2e)"%(i, np.exp(newLogP), newLogP))
 
-        if math.isclose(lastP, newP):
+        if math.isclose(lastLogP, newLogP, rel_tol=10e-7):
+        #if abs(lastLogP-newLogP)<10e-9:
             converged = True
         
-        lastP = newP
+        lastLogP = newLogP
 
-    return model.pi, model.m, model.e, iterProb
+    return np.exp(model.pi), np.exp(model.m), np.exp(model.e), iterProb
 
 class Model():
     def __init__(self, pi, m, e):
@@ -199,16 +201,17 @@ def iterateModel(model, observedSeq, gamma, xi):
     
     return Model(pi, m, e)
 
-def probOfObservations(model, observedSeq):
+def logProbOfObservations(model, observedSeq):
     alpha = calculateAlpha(model, observedSeq)
-    p = np.exp(safeLogAdd(alpha[-1]))
+    p = safeLogAdd(alpha[-1])
     return p
 
 if __name__ =="__main__":
-    #observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1]
-    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1]
+    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1]
+    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1]
+    print(len(observedSeq))
     #observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3]
-    hidden = 50
+    hidden = 10
     observeable = 5
 
     for i in range(5):
