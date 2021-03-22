@@ -161,10 +161,10 @@ def calculateXi(model, observedSeq, alpha, beta, gamma):
         beta_t = beta[t+1]
         alpha_t = alpha[t]
 
-        j_row = e_obs * beta_t
+        j_row = e_obs + beta_t
 
-        ts = np.outer(alpha_t, j_row) * model.m
-        xi[t] = ts / np.sum(ts)
+        ts = np.add.outer(alpha_t, j_row) + model.m
+        xi[t] = ts - safeLogAdd(ts.reshape(-1))
 
     return xi
 

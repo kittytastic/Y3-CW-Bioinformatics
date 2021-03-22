@@ -168,11 +168,11 @@ class TestCalcXi(unittest.TestCase):
         i_2 = 2
         j_2 = 3
         t = 3
-        unnorm_v1 = alpha[t, i_1]* self.model.m[i_1, j_1]*self.model.e[j_1, obsStates[t+1]]*beta[t+1, j_1]
-        unnorm_v2 = alpha[t, i_2]* self.model.m[i_2, j_2]*self.model.e[j_2, obsStates[t+1]]*beta[t+1, j_2]
+        unnorm_v1 = alpha[t, i_1]+ self.model.m[i_1, j_1]+self.model.e[j_1, obsStates[t+1]]+beta[t+1, j_1]
+        unnorm_v2 = alpha[t, i_2]+ self.model.m[i_2, j_2]+self.model.e[j_2, obsStates[t+1]]+beta[t+1, j_2]
 
-        r1 = unnorm_v1/unnorm_v2
-        r2 = xi[t, i_1, j_1]/xi[t, i_2, j_2]
+        r1 = unnorm_v1-unnorm_v2
+        r2 = xi[t, i_1, j_1]-xi[t, i_2, j_2]
         
         self.assertAlmostEqual(r1, r2)
 
@@ -185,7 +185,7 @@ class TestCalcXi(unittest.TestCase):
         xi = calculateXi(self.model, obsStates, alpha, beta, gamma)
 
         for t in range(len(obsStates)-1):
-            self.assertAlmostEqual(np.sum(xi[t]), 1.0)
+            self.assertAlmostEqual(safeLogAdd(xi[t].reshape(-1)), LOG_1)
 
     def test_j_sum_gamma(self):
         obsStates = [0,1,2]
@@ -197,7 +197,7 @@ class TestCalcXi(unittest.TestCase):
 
         for t in range(len(obsStates)-1):
             for i in range(self.model.hidden):
-                self.assertAlmostEqual(np.sum(xi[t, i]), gamma[t,i])
+                self.assertAlmostEqual(safeLogAdd(xi[t, i]), gamma[t,i])
 
 
 class TestIterModel(unittest.TestCase):
