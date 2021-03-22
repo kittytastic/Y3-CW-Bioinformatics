@@ -177,26 +177,24 @@ def calculateXi(model, observedSeq, alpha, beta, gamma):
 def iterateModel(model, observedSeq, gamma, xi):
     pi = gamma[1]
 
-    # only sum over 0 -> T-1, easy for xi, fiddle for gamma
-    m = np.sum(xi, axis=0)/np.expand_dims((np.sum(gamma, axis=0)-gamma[-1]), axis=1)
-
     m = np.zeros((model.hidden, model.hidden))
     for i in range(model.hidden):
+        gammas = gamma[:-1, i]
+        assert(len(gammas) == len(gamma)-1)
+        denom = safeLogAdd(gammas)
         for j in range(model.hidden):
             xis = xi[:, i, j]
-            gammas = gamma[:-1, i]
-            assert(len(gammas) == len(gamma)-1)
-            m[i,j] = safeLogAdd(xis)-safeLogAdd(gammas)
+            m[i,j] = safeLogAdd(xis)-denom
 
     e = np.ones((model.hidden, model.observeable))
     for i in range(model.hidden):
+        denom = safeLogAdd(gamma[:,i])
         for k in range(model.observeable):
             gamma_ik_mask = np.where(np.array(observedSeq)==k, True, False)
             gamma_ik = gamma[:,i]
             gamma_ik = gamma_ik[gamma_ik_mask]
-            e[i,k]=safeLogAdd(gamma_ik) - safeLogAdd(gamma[:,i])
+            e[i,k] = safeLogAdd(gamma_ik) - denom
         
-        #e[i] /= np.sum(e[i])
             
     
     return Model(pi, m, e)
