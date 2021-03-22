@@ -78,6 +78,11 @@ def logAddExp(*args):
     tmp = np.array(args)
     return np.log(np.sum(np.exp(tmp)))
 
+def safeLogAdd(x):
+    assert(len(x.shape)==1)
+    y = x[1:] - x[0]
+    return x[0] + np.log1p(np.sum(np.exp(y)))
+
 
 def createInitialModel(hidden_states, observeable_states):
     #pi = np.ones(hidden_states)
@@ -118,7 +123,7 @@ def calculateAlpha(model, observedSeq):
         for j in range(model.hidden):
             m__j = model.m[:,j]
             a_t = alpha[t-1]
-            alpha[t, j] = logAddExp(a_t+m__j)+model.e[j, observedSeq[t]]
+            alpha[t, j] = safeLogAdd(a_t+m__j)+model.e[j, observedSeq[t]]
         
 
     return alpha
@@ -134,7 +139,7 @@ def calculateBeta(model, observedSeq):
 
     for t in reversed(range(len(observedSeq)-1)):
         for i in range(model.hidden):
-            beta[t, i] = logAddExp(model.m[i]+model.e[:,observedSeq[t+1]]+beta[t+1])
+            beta[t, i] = safeLogAdd(model.m[i]+model.e[:,observedSeq[t+1]]+beta[t+1])
 
     return beta
 
@@ -144,7 +149,7 @@ def calculateGamma(model, observedSeq, alpha, beta):
     gamma = alpha + beta
 
     for t in range(len(observedSeq)):
-        gamma[t] -= logAddExp(alpha[t]+beta[t])
+        gamma[t] -= safeLogAdd(alpha[t]+beta[t])
 
     return gamma
 
