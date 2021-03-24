@@ -20,7 +20,25 @@ Using the tools we have created we can now adapt the Viterbi Algorithm to solve 
 \begin{align*}
     \textbf{Base Case: } &\delta_1(i) = \Pi_i e_i(O_1)\\
     \textbf{Inductive Case: } &\delta_t(j) = \max_{1\leq i \leq N}[\delta_{t-1}(i)\psi(i,j)]\cdot e_j(O_t)
-    \end{align*}
+\end{align*}
+
+\subsubsection*{Proof}
+\textbf{Proof:} Dijkstra's algorithm will calculate the most likely path. We will focus on the negative log probability version as the addpation is eqivelent. Transforming out probabilites to negative log probabilities will leave the edgees in range $[0, \inf]$. As no edge has value $<0$ we can use Dijkstras.
+
+\textbf{Proof:} smth independence of HMM
+
+
+
+\subsubsection*{Complexity}
+Firstly time complpexity. Let $h$ be the number of hidden states. The compleexity of the origial Viterbi algorithm is $O(nh^2)$ as for every timestep we consider the path from each hidden state to every other hidden state. Once we have calculated $\psi$ and $\Pi$ then our addapted viterbi also has complexity $O(nh^2)$ assuming the complexity to lookup $\psi(i,j)$ and $\Pi(i)$ is $O(1)$ which can be achived by stroing $\psi$ and $\Pi$ in arrays. Djikstas algorithm has complexity $O(|E|+|V|log|V|)$. Calculating $\Pi$, $|E| = h+1$ and $|V| = h^2 + n$ so we have complexity $O(h+1 + (h^2+1) \log(h^2+h)) = O(h^2 \log(h))$. Calculating $\psi$, $|E| = h$ and $|V| = h^2$ so we have complexity $O(h + h^2 \log(h^2)) = O(h^2 \log(h))$ for each $h$ states. Hence, the overall complexity of calculating $\psi$ is $n\cdot O(h^2 \log(h)) = O(h^3 \log(h))$. Given calculating $\Pi$ and $\psi$ are preprocessing steps the total complexity is: 
+
+\begin{align*}
+&O(h^3 \log(h)) + O(h^2 \log(h)) + O(nh^2) \\
+=& O(h^3 \log(h)) + O(nh^2)
+\end{align*}
+
+
+
 \subsection{}
 A hidden markov model can be defined as $\lambda = (\pi, m, e)$ where: $\pi$ are the initial probabilities, $m$ are the transition probabilities, and $e$ are the emission probabilities.
 The goal of the Expectation Maximisation algorithm is to calculate a value of $\lambda$ that maximises $p(x|\lambda)$ for a given sequence of observed data $x$. As finding a global maximum is computationally intractable we use the Baum-Welch algorithm which gives us a local maximum. The Baum-Welch algorithm generates $\hat{\lambda}$ from $\lambda$ where $p(x|\hat{\lambda}) \geq p(x|\lambda)$. Iterating this process, where at each step we say $\lambda \gets \hat{\lambda}$, converges to a local optimum.
