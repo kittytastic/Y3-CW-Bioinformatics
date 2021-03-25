@@ -35,15 +35,15 @@ Backtracking this new algorithm only requires minor modifications. We need to ke
 
 
 \subsubsection*{Complexity}
-Firstly, time complexity. Let $h$ be the number of hidden states. The time complexity of the original Viterbi algorithm is $O(nh^2)$ as for every time step we consider the path from each hidden state to every other hidden state. We calculate $\psi$ and $\Pi$ in preprocessing steps. Therefore, our adapted Viterbi algorithm also has running time $O(nh^2)$ as the lookup time for $\psi(i,j)$ and $\Pi(i)$ is $O(1)$. Djiksta's algorithm has complexity $O(|E|+|V|log|V|)$. Calculating $\Pi$, $|E| = h+1$ and $|V| = h^2 + n$ so we have complexity $O(h+1 + (h^2+1) \log(h^2+h)) = O(h^2 \log(h))$. Calculating $\psi$, $|E| = h$ and $|V| = h^2$ so we have complexity $O(h + h^2 \log(h^2)) = O(h^2 \log(h))$ for each $h$ states. Hence, the overall complexity of calculating $\psi$ is $n\cdot O(h^2 \log(h)) = O(h^3 \log(h))$. The complexity of backtracking all nodes in a graph after Djiksta's is $O(h^2)$, so backtracking $h$ rounds of Djiksta's will have complexity $O(h^3)$. Backtracking Viterbi is $O(n)$, however given our modification you may need to copy paths of length $h$ at every step, hence it has total running time $O(nh)$. The overall time complexity of this algorithm is:
+Firstly, time complexity. Let $k$ be the number of hidden states. The time complexity of the original Viterbi algorithm is $O(nk^2)$ as for every time step we consider the path from each hidden state to every other hidden state. We calculate $\psi$ and $\Pi$ in preprocessing steps. Therefore, our adapted Viterbi algorithm also has running time $O(nk^2)$ as the lookup time for $\psi(i,j)$ and $\Pi(i)$ is $O(1)$. Djiksta's algorithm has complexity $O(|E|+|V|log|V|)$. Calculating $\Pi$, $|E| = k+1$ and $|V| = k^2 + k$ so we have complexity $O(k+1 + (k^2+1) \log(k^2+k)) = O(k^2 \log(k))$. Calculating $\psi$, $|E| = k$ and $|V| = k^2$ so we have complexity $O(k + k^2 \log(k^2)) = O(k^2 \log(k))$ for each $k$ states. Hence, the overall complexity of calculating $\psi$ is $k\cdot O(k^2 \log(k)) = O(k^3 \log(k))$. The complexity of backtracking all nodes in a graph after Djiksta's is $O(k^2)$, so backtracking $k$ rounds of Djiksta's will have complexity $O(k^3)$. Backtracking Viterbi is $O(n)$, however given our modification you may need to copy paths of length $k$ at every step, hence it has total running time $O(nk)$. The overall time complexity of this algorithm is:
 \begin{align*}
-&O(h^3 \log(h)) + O(h^2 \log(h)) + O(nh^2) + O(h^3) + O(nh)\\
-=& O(h^3 \log(h)) + O(nh^2)
+&O(k^3 \log(k)) + O(k^2 \log(k)) + O(nk^2) + O(k^3) + O(nk)\\
+=& O(k^3 \log(k)) + O(nk^2)
 \end{align*}
 
-Next, space complexity. We will continue to use $h$ as the number of hidden states. The forward pass of Viterbi requires $O(nh)$ space and the backtrack matrix requires $O(nh^2)$ space. Djiksta's requires $O(h^2)$ space to store the graph, however we only need to store one graph at a time. Calculating Djiksta's will also require $O(h)$ space as we store a value for every states. Storing $\psi$ will require $O(h^2)$ space. Storing the corresponding paths of $\psi$ will require $O(h^3)$ space as for every value of $\psi$ the maximum length of path is $h$. Therefore the total space complexity is:
+Next, space complexity. We will continue to use $k$ as the number of hidden states. The forward pass of Viterbi requires $O(k)$ space and the backtrack matrix requires $O(nk)$ space. Djiksta's requires $O(k^2)$ space to store the graph, however we only need to store one graph at a time. Calculating Djiksta's will also require $O(k)$ space as we store a value for every states. Storing $\psi$ will require $O(k^2)$ space. Storing the corresponding paths of $\psi$ will require $O(k^3)$ space as for every value of $\psi$ the maximum length of path is $k$. Therefore the total space complexity is:
 \begin{align*}
-    O(h^3) + O(nh^2)
+    O(k^3) + O(nk)
 \end{align*} 
 
 
