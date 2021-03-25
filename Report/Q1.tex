@@ -22,20 +22,26 @@ Using the tools we have created we can now adapt the Viterbi Algorithm to solve 
     \textbf{Inductive Case: } &\delta_t(j) = \max_{1\leq i \leq N}[\delta_{t-1}(i)\psi(i,j)]\cdot e_j(O_t)
 \end{align*}
 
-\subsubsection*{Proof}
-\textbf{Proof:} Dijkstra's algorithm will calculate the most likely path. We will focus on the negative log probability version as the addpation is eqivelent. Transforming out probabilites to negative log probabilities will leave the edgees in range $[0, \inf]$. As no edge has value $<0$ we can use Dijkstras.
+To backtrack this new algorithm only requires minor modifications. We need to keep a track of each corresponding shortest path for every value of $\psi(i,j)$. We also keep track of preceding states during the Viterbi algorithm, much like you normally would. When backtracking you backtrack through Viterbi as usual; However, now if node $i$ procceeds $j$ we don't just add node $i$ to the path, we add the path of states corresponding to $\psi(i,j)$.
 
-\textbf{Proof:} smth independence of HMM
+\subsubsection*{Proof of Correctness}
+\textbf{Proof:} Dijkstras algorithm calculates the most probable path between 2 states. By construction the graph we create represents the proability of transitioning states. Dijkstras alggorithm will find the shortest path from a start node to every other node. To calculate the probability of a path we take the product of probabilities along a path and seek a maximum. We can reduce the problem of most probable path to the shortest path by transforming all probabilities into negative log probabilities. Now rather than a product we are taking a sum. As for any probability $p$, $0 \leq p \leq 1$ we show that $-\infty < \log(p) \leq 0$ hence $0 \leq -\log(p) < \infty$. As all edges are non-negative, by the correctness of Djikstas it will calculate the minimum negative log probability which is equivilent to maximum probable path.
+
+\textbf{Proof:} At each Viterbi step between states $i,j$ the most likely path will use the transition $\psi(i,j)$. Assume that we don't use $\psi(i,j)$ and instead use a path of probability $\alpha$ where $\alpha \neq \psi(i,j)$. The total probability of the path is $\alpha \cdot \beta$, where $\beta$ is the rest of the path. However, using the pervious proof we know $\alpha < \psi(i,j)$ hence $\alpha \cdot \beta < \psi(i,j) \cdot \beta$, a contradition. Therefore the most probable path must use the path corresponding to $\psi(i,j)$.   
 
 
 
 \subsubsection*{Complexity}
-Firstly time complpexity. Let $h$ be the number of hidden states. The compleexity of the origial Viterbi algorithm is $O(nh^2)$ as for every timestep we consider the path from each hidden state to every other hidden state. Once we have calculated $\psi$ and $\Pi$ then our addapted viterbi also has complexity $O(nh^2)$ assuming the complexity to lookup $\psi(i,j)$ and $\Pi(i)$ is $O(1)$ which can be achived by stroing $\psi$ and $\Pi$ in arrays. Djikstas algorithm has complexity $O(|E|+|V|log|V|)$. Calculating $\Pi$, $|E| = h+1$ and $|V| = h^2 + n$ so we have complexity $O(h+1 + (h^2+1) \log(h^2+h)) = O(h^2 \log(h))$. Calculating $\psi$, $|E| = h$ and $|V| = h^2$ so we have complexity $O(h + h^2 \log(h^2)) = O(h^2 \log(h))$ for each $h$ states. Hence, the overall complexity of calculating $\psi$ is $n\cdot O(h^2 \log(h)) = O(h^3 \log(h))$. Given calculating $\Pi$ and $\psi$ are preprocessing steps the total complexity is: 
-
+Firstly time complpexity. Let $h$ be the number of hidden states. The compleexity of the origial Viterbi algorithm is $O(nh^2)$ as for every timestep we consider the path from each hidden state to every other hidden state. Once we have calculated $\psi$ and $\Pi$ then our addapted viterbi also has complexity $O(nh^2)$ assuming the complexity to lookup $\psi(i,j)$ and $\Pi(i)$ is $O(1)$ which can be achived by stroing $\psi$ and $\Pi$ in arrays. Djikstas algorithm has complexity $O(|E|+|V|log|V|)$. Calculating $\Pi$, $|E| = h+1$ and $|V| = h^2 + n$ so we have complexity $O(h+1 + (h^2+1) \log(h^2+h)) = O(h^2 \log(h))$. Calculating $\psi$, $|E| = h$ and $|V| = h^2$ so we have complexity $O(h + h^2 \log(h^2)) = O(h^2 \log(h))$ for each $h$ states. Hence, the overall complexity of calculating $\psi$ is $n\cdot O(h^2 \log(h)) = O(h^3 \log(h))$. The complexity of backtracking all nodes in a graph after Djikstas is $O(h^2)$, so backtracking $h$ rounds of Djikstas will have complexity $O(h^3)$. Backtracking Viterbi is $O(n)$, however given our modification you may need to copy paths of length $h$ at every step, hence it has total complexity $O(nh)$. The overall time complexity of this algorithm is.
 \begin{align*}
-&O(h^3 \log(h)) + O(h^2 \log(h)) + O(nh^2) \\
+&O(h^3 \log(h)) + O(h^2 \log(h)) + O(nh^2) + O(h^3) + O(nh)\\
 =& O(h^3 \log(h)) + O(nh^2)
 \end{align*}
+
+Next, Time complexity. We will continue to use $h$ as the number of hidden states. The forward pass of Viterbi requires $O(hn)$ and the backtrack matrix requires $O(h^2n)$ space. Djikstas requires $O(h^2)$ space to store the graph, however we only need to store one graph at a time. Calculating Djikstas will also require $O(h)$ space as we store a value for every states. Storing $\psi$ will require $O(h^2)$ space. Storing the corresponding paths of $\psi$ will require $O(h^3)$ space as for every value of $\psi$ the maximum length of path is $h$. Therefore the total space complexity is:
+\begin{align*}
+    O(h^3) + O(nh^2)
+\end{align*} 
 
 
 
