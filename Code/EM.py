@@ -215,7 +215,7 @@ if __name__ =="__main__":
     observeable = 5
 
     for i in range(5):
-        _, _, _, probs = estimateModel(observedSeq, hidden, observeable, verbose=True) 
+        _, _, _, probs = estimateModel(observedSeq, hidden*(i+1), observeable, verbose=True) 
         plt.plot(probs, color='C%d'%i)
     plt.ylabel('$p(x|\lambda)$')
     plt.yscale('log')
