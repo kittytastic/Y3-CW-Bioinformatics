@@ -28,12 +28,13 @@ def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=Fa
 
     model = createInitialModel(numHiddenStates, numObserveableStates)
     if verbose:
-        print("P initial: %.2f"%probOfObservations(model, observedSeq))
+        lp = logProbOfObservations(model, observedSeq)
+        print("P initial: %.2e (log prob: %.2e)"%(np.exp(lp), lp))
     
 
     iterProb = []
-    lastP = 0.0
-    iterProb.append(lastP)
+    lastLogP = np.NINF
+    iterProb.append(np.exp(lastLogP))
     i = 0
     converged = False
     while not converged:
@@ -44,18 +45,19 @@ def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=Fa
         xi = calculateXi(model, observedSeq, alpha, beta, gamma)
         model = iterateModel(model, observedSeq, gamma, xi)
         
-        newP = probOfObservations(model, observedSeq)
-        iterProb.append(newP)
+        newLogP = logProbOfObservations(model, observedSeq)
+        iterProb.append(np.exp(newLogP))
 
         if verbose:
-            print("P %d: %.2e"%( i, newP))
+            print("P %d: %.2e   (log prob: %.2e)"%(i, np.exp(newLogP), newLogP))
 
-        if math.isclose(lastP, newP):
+        if math.isclose(lastLogP, newLogP, rel_tol=10e-7):
+        #if abs(lastLogP-newLogP)<10e-9:
             converged = True
         
-        lastP = newP
+        lastLogP = newLogP
 
-    return model.pi, model.m, model.e, iterProb
+    return np.exp(model.pi), np.exp(model.m), np.exp(model.e), iterProb
 
 class Model():
     def __init__(self, pi, m, e):
@@ -74,6 +76,21 @@ class Model():
 
         return outS
 
+def logAddExp(*args):
+    tmp = np.array(args)
+    return np.log(np.sum(np.exp(tmp)))
+
+def safeLogAdd(x):
+    assert(len(x.shape)==1)
+    if len(x)==0:
+        return np.NINF
+    special = x.max()
+    i_special = x.argmax()
+    remaining = x[np.arange(len(x))!=i_special]
+    y = remaining - special
+    return special + np.log1p(np.sum(np.exp(y)))
+
+
 def createInitialModel(hidden_states, observeable_states):
     #pi = np.ones(hidden_states)
     #pi /= hidden_states
@@ -88,12 +105,15 @@ def createInitialModel(hidden_states, observeable_states):
 
     pi = np.random.rand(hidden_states)
     pi /= pi.sum()
+    pi = np.log(pi)
 
     m = np.random.rand(hidden_states, hidden_states)
     m /= np.expand_dims(m.sum(axis=1), axis=1)
+    m = np.log(m)
 
     e = np.random.rand(hidden_states, observeable_states)
     e /= np.expand_dims(e.sum(axis=1), axis=1)
+    e = np.log(e)
 
     return Model(pi, m, e)
 
@@ -101,7 +121,7 @@ def calculateAlpha(model, observedSeq):
     alpha = np.zeros((len(observedSeq), model.hidden))
 
     # Base case: alpha_1(i) = pi_i * e_i(O_1)
-    alpha[0] = model.pi * model.e[:, observedSeq[0]]
+    alpha[0] = model.pi + model.e[:, observedSeq[0]]
     
 
     # Inductive case: alpha_{t+1}(j) = [\sigma_{i=1}^N alpha_t(i) m_ij ] * e_i(O_1)
@@ -110,35 +130,33 @@ def calculateAlpha(model, observedSeq):
         for j in range(model.hidden):
             m__j = model.m[:,j]
             a_t = alpha[t-1]
-            alpha[t, j] = np.sum(a_t*m__j)*model.e[j, observedSeq[t]]
+            alpha[t, j] = safeLogAdd(a_t+m__j)+model.e[j, observedSeq[t]]
         
 
     return alpha
 
 def calculateBeta(model, observedSeq):
-    beta = np.zeros((len(observedSeq), model.hidden))
+    beta = np.ones((len(observedSeq), model.hidden))
 
     # Base case
-    beta[-1] = np.ones(model.hidden)
+    beta[-1] = np.zeros(model.hidden) # log(1) = 0
 
     # Inductive case
     i = 0
-    seq_i = -1
-    ans = np.sum(model.m[i]*model.e[:,observedSeq[-1]]*beta[-1])
 
     for t in reversed(range(len(observedSeq)-1)):
         for i in range(model.hidden):
-            beta[t, i] = np.sum(model.m[i]*model.e[:,observedSeq[t+1]]*beta[t+1])
+            beta[t, i] = safeLogAdd(model.m[i]+model.e[:,observedSeq[t+1]]+beta[t+1])
 
     return beta
 
 def calculateGamma(model, observedSeq, alpha, beta):
-    gamma = np.zeros((len(observedSeq), model.hidden))
+    gamma = np.ones((len(observedSeq), model.hidden))
 
-    gamma = alpha * beta
+    gamma = alpha + beta
 
     for t in range(len(observedSeq)):
-        gamma[t] /= np.sum(gamma[t])
+        gamma[t] -= safeLogAdd(alpha[t]+beta[t])
 
     return gamma
 
@@ -150,10 +168,10 @@ def calculateXi(model, observedSeq, alpha, beta, gamma):
         beta_t = beta[t+1]
         alpha_t = alpha[t]
 
-        j_row = e_obs * beta_t
+        j_row = e_obs + beta_t
 
-        ts = np.outer(alpha_t, j_row) * model.m
-        xi[t] = ts / np.sum(ts)
+        ts = np.add.outer(alpha_t, j_row) + model.m
+        xi[t] = ts - safeLogAdd(ts.reshape(-1))
 
     return xi
 
@@ -161,34 +179,43 @@ def calculateXi(model, observedSeq, alpha, beta, gamma):
 def iterateModel(model, observedSeq, gamma, xi):
     pi = gamma[1]
 
-    # only sum over 0 -> T-1, easy for xi, fiddle for gamma
-    m = np.sum(xi, axis=0)/np.expand_dims((np.sum(gamma, axis=0)-gamma[-1]), axis=1)
+    m = np.zeros((model.hidden, model.hidden))
+    for i in range(model.hidden):
+        gammas = gamma[:-1, i]
+        assert(len(gammas) == len(gamma)-1)
+        denom = safeLogAdd(gammas)
+        for j in range(model.hidden):
+            xis = xi[:, i, j]
+            m[i,j] = safeLogAdd(xis)-denom
 
     e = np.ones((model.hidden, model.observeable))
     for i in range(model.hidden):
+        denom = safeLogAdd(gamma[:,i])
         for k in range(model.observeable):
             gamma_ik_mask = np.where(np.array(observedSeq)==k, True, False)
-            gamma_ik = np.sum(gamma[:,i], where=gamma_ik_mask)
-            e[i,k]=gamma_ik
+            gamma_ik = gamma[:,i]
+            gamma_ik = gamma_ik[gamma_ik_mask]
+            e[i,k] = safeLogAdd(gamma_ik) - denom
         
-        e[i] /= np.sum(e[i])
             
     
     return Model(pi, m, e)
 
-def probOfObservations(model, observedSeq):
+def logProbOfObservations(model, observedSeq):
     alpha = calculateAlpha(model, observedSeq)
-    p = np.sum(alpha[-1])
+    p = safeLogAdd(alpha[-1])
     return p
 
 if __name__ =="__main__":
     observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1]
+    observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3,3,3,1,1,1,1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,0,0,0,1,1,2,1,1,1,1,1,1,1,1,1,0,0,0,1,1]
+    print(len(observedSeq))
     #observedSeq = [0,0,0,1,1,2,3,1,1,1,1,0,3,3,3,3,3]
-    hidden = 6
+    hidden = 10
     observeable = 5
 
     for i in range(5):
-        _, _, _, probs = estimateModel(observedSeq, hidden, observeable, verbose=True) 
+        _, _, _, probs = estimateModel(observedSeq, hidden*(i+1), observeable, verbose=True) 
         plt.plot(probs, color='C%d'%i)
     plt.ylabel('$p(x|\lambda)$')
     plt.yscale('log')
