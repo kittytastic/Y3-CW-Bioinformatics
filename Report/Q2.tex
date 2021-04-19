@@ -1,17 +1,33 @@
 \subsection{}
-The \algo{BUILD} algorithm builds a rooted tree from a set of constraints on leaves if possible. The constraints used are of the form $(i,j)<(k,l)$. $(x,y)$ denotes the lowest common ancestor of $x$ and $y$ where we can assume $x \neq y$. $(i,j)<(k,l)$ denotes that $(i,j)$ is a proper descendant of $(k,l)$ i.e. $(i,j)$ is further from the root than $(k,l)$. A set of these constraints can be used to build a tree, however it is not always possible to build a tree from a set of constraints.
+The \algo{BUILD} algorithm builds a rooted tree from a set of constraints on leaves if possible.
+The constraints used are of the form $(i,j)<(k,l)$. $(x,y)$ denotes the lowest common ancestor of $x$ and $y$ where we can assume $x \neq y$. $(i,j)<(k,l)$ denotes that $(i,j)$ is a proper descendant of $(k,l)$ i.e. $(i,j)$ is further from the root than $(k,l)$.
+A set of these constraints can be used to build a tree, however it is not always possible to build a tree from a set of constraints.
 
-The \algo{BUILD} is a recursive algorithm where at every recursive step it aims to partition the current set of symbols (leaves) into subsets, which can then be  recused  into. Formalising this, given a set of symbols $T$ we want to partition $T$ into subsets $S_1, S_2, \cdot, S_r$ where $r \geq 2$. To create these subsets we observe two conditions that subsets must follow for a constraint $(i,j)<(k,l)$.
-(1) $i$ and $j$ must be in the same set. Otherwise $(i, j)$ cannot be a proper descendant of $(k,l)$.
-(2) Either $k$ and $l$ are in different sets (so $(k,l)$ is the root). Or $i,j,k,l$ are in the same set (so the constraint is dealt with in a future recursive call). If $k$ and $l$ are in the same set that isn't the same set as $i,j$ are in then $(i,j)$ and $(k,l)$ are siblings, hence not holding the constraint.
+The \algo{BUILD} is a recursive algorithm where at every recursive step it aims to partition the current set of symbols (leaves) into subsets, which can then be  recused  into.
+Formalising this, given a set of symbols $T$ we want to partition $T$ into subsets $S_1, S_2, \cdot, S_r$ where $r \geq 2$. To create these subsets we observe two conditions that subsets must follow for a constraint $(i,j)<(k,l)$.
+(1) $i$ and $j$ must be in the same set.
+Otherwise $(i, j)$ cannot be a proper descendant of $(k,l)$.
+(2) Either $k$ and $l$ are in different sets (so $(k,l)$ is the root).
+Or $i,j,k,l$ are in the same set (so the constraint is dealt with in a future recursive call).
+If $k$ and $l$ are in the same set that isn't the same set as $i,j$ are in then $(i,j)$ and $(k,l)$ are siblings, hence not holding the constraint.
 
-Given we partition symbols into subsets it seems natural that we also partition constraints so that recursive steps need not filter the constraints to find those that are applicable given the current set of symbols. There are 2 different cases arising from the possible partitioning of symbols.
+Given we partition symbols into subsets it seems natural that we also partition constraints so that recursive steps need not filter the constraints to find those that are applicable given the current set of symbols.
+There are 2 different cases arising from the possible partitioning of symbols.
 (1) $k,l$ are in the same subset hence we have a subset $i,j,k,l$. This doesn't yet fulfill our constraint so the constraint needs to be included in the partition.
-(2) $k,l$ are in different sets implying $(k,l)$ is the root and $(i,j)$ is a child. As we have satisfied the constraint, and no recursive step can invalidate the constraint, it does not need to be included in the partition. I.e. the constraint has been fulfilled and can be ignored in further recursive steps.
+(2) $k,l$ are in different sets implying $(k,l)$ is the root and $(i,j)$ is a child.
+As we have satisfied the constraint, and no recursive step can invalidate the constraint, it does not need to be included in the partition. I.e. the constraint has been fulfilled and can be ignored in further recursive steps.
 
-With this constraint partition scheme it becomes easy to see that if we are only able to partition the symbols into one set then we cannot create a tree. A recursive step will not eliminate any conditions nor create subsets of symbols hence will not aid in making a tree (as it is impossible), ultimately leading inductively to an infinite loop.
+With this constraint partition scheme it becomes easy to see that if we are only able to partition the symbols into one set then we cannot create a tree.
+A recursive step will not eliminate any conditions nor create subsets of symbols hence will not aid in making a tree (as it is impossible), ultimately leading inductively to an infinite loop.
 
-With these methods for partitioning symbols and constraint we have all the tools we need to define the \algo{BUILD} algorithm. The recursive \algo{BUILD} function will taken in as arguments a set of symbols and constraints. It will return a tree. As a base case \algo{BUILD} on a single symbol is returned as a single node tree. At every step we conduct the partition step which partitions the symbols, using the rules as described above. If we find the partition only creates one set of symbols then we know there is no tree that satisfies these constraints, hence that error can be propagated back through the recursion, for example by returning a null tree. We can eliminate and partition constraints using the partitioned symbols and rules as described above. If there is no error we can recurse into each subset pair of symbols and constraints. These recursive calls will return subtrees for each child. These child subtrees can be gathering under a new root node into a full tree which is then returned.    
+With these methods for partitioning symbols and constraint we have all the tools we need to define the \algo{BUILD} algorithm.
+The recursive \algo{BUILD} function will taken in as arguments a set of symbols and constraints.
+It will return a tree. As a base case \algo{BUILD} on a single symbol is returned as a single node tree.
+At every step we conduct the partition step which partitions the symbols, using the rules as described above.
+If we find the partition only creates one set of symbols then we know there is no tree that satisfies these constraints, hence that error can be propagated back through the recursion, for example by returning a null tree.
+We can eliminate and partition constraints using the partitioned symbols and rules as described above.
+If there is no error we can recurse into each subset pair of symbols and constraints.
+These recursive calls will return subtrees for each child. These child subtrees can be gathering under a new root node into a full tree which is then returned.    
 
 \subsection{}
 \begin{algorithm}[H]
@@ -107,7 +123,9 @@ With these methods for partitioning symbols and constraint we have all the tools
 \subsection{}
 \subsubsection*{}
 To begin we will define some useful notation.
-A tree can be thought of as containing $N$ subtrees which are all immediate children of the root. $l^j_i$ denotes leaf $i$ in subtree $j$. $n_j$ denotes number of leaves in subtree j. This notation can be visualised as follows:\\
+A tree can be thought of as containing $N$ subtrees which are all immediate children of the root.
+$l^j_i$ denotes leaf $i$ in subtree $j$. $n_j$ denotes number of leaves in subtree j.
+This notation can be visualised as follows:\\
 \Tree [. 
     \qroof{\textit{$l_1^1, l_2^1, \dots, l_{n_1}^1 $}}.
     \qroof{\textit{$l_1^2, l_2^2, \dots, l_{n_2}^2 $}}.
@@ -115,7 +133,10 @@ A tree can be thought of as containing $N$ subtrees which are all immediate chil
     \qroof{\textit{$l_1^N, \ldots$}}.
 ]\\
 
-Constraint are of the form $(u,v)<(w,x)$ where $u,v,w,x$ are leaves, we call this a complete constraint as all leaves are defined. For this algorithm we also introduce a special constraint, called an incomplete constraint. This is of the form $(u, v)<(w, *)$ where $*$ denotes a leaf which has yet to be decided. Incomplete constraints are useful tool for creating constraints that depend on both a recursive step and its' parent recursive step.  
+Constraint are of the form $(u,v)<(w,x)$ where $u,v,w,x$ are leaves, we call this a complete constraint as all leaves are defined.
+For this algorithm we also introduce a special constraint, called an incomplete constraint.
+This is of the form $(u, v)<(w, *)$ where $*$ denotes a leaf which has yet to be decided.
+Incomplete constraints are useful tool for creating constraints that depend on both a recursive step and its' parent recursive step.  
 
 
 The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{RB}) and \algo{REVERSE BUILD STEP} (\algo{RBS}). The \algo{RBS} function is a recursive function that does all of the work. \algo{RB} is just used to remove any incomplete constraints in a final answers.
@@ -155,7 +176,8 @@ The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{R
 
 
 
- The first part of the proof will show that the constraints we create can be used by \algo{BUILD} for partitioning, we will call this de-partitioning. De-partitioning can be thought of as the inverse of the \algo{BUILD} algorithms' partition algorithm. De-partitioning can be visualised as preforming the following transformation.\\
+ The first part of the proof will show that the constraints we create can be used by \algo{BUILD} for partitioning, we will call this de-partitioning.
+ De-partitioning can be thought of as the inverse of the \algo{BUILD} algorithms' partition algorithm. De-partitioning can be visualised as preforming the following transformation.\\
  
 \textbf{Input}
  \Tree [.
@@ -176,16 +198,33 @@ The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{R
 ]\\
 %Note $(i, j) < (k, l)$ means $k \equiv l \implies i \equiv l$ and $i \equiv j$
 
-The de-partition algorithm is preformed across 2 recursive layers. First line:\ref{alg:make} creates a set of incomplete constraints. Next line:\ref{alg:fill} completes the constraints completing de-partitioning. To prove that these 2 steps will de-partition we will prove that the constraint represent the aforementioned transformation.
+The de-partition algorithm is preformed across 2 recursive layers.
+First line:\ref{alg:make} creates a set of incomplete constraints. Next line:\ref{alg:fill} completes the constraints completing de-partitioning.
+To prove that these 2 steps will de-partition we will prove that the constraint represent the aforementioned transformation.
 
 Let us set the unknown leaf $*$ to $x$ where $x\subset T-l$.
-\algo{RBS} creates constraints $(l_1^1, l_1^2) < (l_1^1, x)$, $(l_1^2, l_1^3) < (l_1^2, x)$, \ldots. It is clear to see that these constraints can only be satisfied if a pair $l_1^k, l_1^{k+1}$ are in the same partition of T. Next we will prove that all these paris are in the same partition of T. Each pair have implications $l_1^1 \equiv l_1^2$, $l_1^2 \equiv l_1^3$, \ldots. Which can be simplified down to $l_1^1 \equiv l_1^2 \equiv l_1^3 \equiv \ldots$ which is equivalent to $l^1 \equiv l^2 \equiv l^3 \equiv \ldots$ where omission of the intra subset index implies the whole subset. Hence we have proved all $l$ are in the same partition of the tree.
+\algo{RBS} creates constraints $(l_1^1, l_1^2) < (l_1^1, x)$, $(l_1^2, l_1^3) < (l_1^2, x)$, \ldots.
+It is clear to see that these constraints can only be satisfied if a pair $l_1^k, l_1^{k+1}$ are in the same partition of T.
+Next we will prove that all these paris are in the same partition of T.
+Each pair have implications $l_1^1 \equiv l_1^2$, $l_1^2 \equiv l_1^3$, \ldots.
+Which can be simplified down to $l_1^1 \equiv l_1^2 \equiv l_1^3 \equiv \ldots$ which is equivalent to $l^1 \equiv l^2 \equiv l^3 \equiv \ldots$ where omission of the intra subset index implies the whole subset.
+Hence we have proved all $l$ are in the same partition of the tree.
 
 
 %what is R
-The second part will inductively prove 2 facts about \algo{RBS} on a tree $T$ of height $h$. Firstly that the complete constraints can be used by \algo{BUILD} to make tree $R$ which is isomorphic to $T$. Secondly the set of incomplete constraints can be used by a parent recursive step to de-partition $R$.
+The second part will inductively prove 2 facts about \algo{RBS} on a tree $T$ of height $h$.
+Firstly that the complete constraints can be used by \algo{BUILD} to make tree $R$ which is isomorphic to $T$. Secondly the set of incomplete constraints can be used by a parent recursive step to de-partition $R$.
 
-\textbf{Base Case:} Tree $T$ of height $1$ (i.e. $T$ is a single root node connected to $N$ leaves). \algo{RBS}  will create an empty set of complete constraints. \algo{BUILD} will create $T$ using an empty set of constraints. Secondly, using the first part of the proof it is easy to see that the incomplete constraints \algo{RBS} makes, can be completed by a parent recursive step to de-partition $T$.
+\textbf{Base Case:} Tree $T$ of height $1$ (i.e. $T$ is a single root node connected to $N$ leaves).
+\algo{RBS}  will create an empty set of complete constraints.
+\algo{BUILD} will create $T$ using an empty set of constraints.
+Secondly, using the first part of the proof it is easy to see that the incomplete constraints \algo{RBS} makes, can be completed by a parent recursive step to de-partition $T$.
 
-\textbf{Inductive Step:} Tree $T$ of height $h+1$ will have $N$ child trees $t_1, \ldots, t_N$ of height $h$. Inductively running \algo{RBS} on any subtree $t_k$ will return a set of complete and incomplete constraints. The first part of the proof shows we can complete the incomplete constraints so the \algo{BUILD} algorithm can partition $T$ into $t_1, \ldots, t_N$. \algo{BUILD} will not carry these completed constraints through while calling \algo{BUILD} on $t_k$. Hence \algo{BUILD} will only be run on $t_k$ with the set of complete constraints. Which inductively will create $t_k$. Hence as \algo{BUILD} will be able to partition and then recuse into the result of \algo{REVERSE BUILD STEP} the recreated tree will be isomorphic to $T$. Again using the first part of the proof it is easy to see that the set of incomplete constraints created on line:\algo{make} can be filled by a parent tree to create a de-partition. 
-
+\textbf{Inductive Step:} Tree $T$ of height $h+1$ will have $N$ child trees $t_1, \ldots, t_N$ of height $h$.
+Inductively running \algo{RBS} on any subtree $t_k$ will return a set of complete and incomplete constraints.
+The first part of the proof shows we can complete the incomplete constraints so the \algo{BUILD} algorithm can partition $T$ into $t_1, \ldots, t_N$.
+\algo{BUILD} will not carry these completed constraints through while calling \algo{BUILD} on $t_k$.
+Hence \algo{BUILD} will only be run on $t_k$ with the set of complete constraints.
+Which inductively will create $t_k$.
+Hence as \algo{BUILD} will be able to partition and then recuse into the result of \algo{REVERSE BUILD STEP} the recreated tree will be isomorphic to $T$.
+Again using the first part of the proof it is easy to see that the set of incomplete constraints created on line:\algo{make} can be filled by a parent tree to create a de-partition. 

@@ -58,20 +58,38 @@ When backtracking you backtrack through Viterbi as usual; However, now if node $
 \textbf{(2) Proof:} At each Viterbi step between states $i,j$ the most likely path will use the path corresponding to $\psi(i,j)$. 
 Assume that we don't use the path corresponding to $\psi(i,j)$ and instead use a path with probability $\alpha$ where $\alpha \neq \psi(i,j)$.
 The total probability of the path entire path is $\alpha \cdot \beta$, where $\beta$ is the probability of the rest of the path.
-However, using the pervious proof we know $\alpha < \psi(i,j)$ hence $\alpha \cdot \beta < \psi(i,j) \cdot \beta$, a contradiction. Therefore the most probable path must use the path corresponding to $\psi(i,j)$. 
+However, using the pervious proof we know $\alpha < \psi(i,j)$ hence $\alpha \cdot \beta < \psi(i,j) \cdot \beta$, a contradiction. 
+Therefore the most probable path must use the path corresponding to $\psi(i,j)$. 
 
-\textbf{(3) Proof:} The algorithm is correct. Using a similar argument to proof (1) we can show the base case of the modified Viterbi algorithm is correct, still returning the most probable path that emits the first observed state. Using proof (2) it is apparent that the inductive step of our modified Viterbi is also correct, calculating the most probable path to $\delta_t(j)$. Hence by induction our modified Viterbi algorithm is correct.  
+\textbf{(3) Proof:} The algorithm is correct. 
+Using a similar argument to proof (1) we can show the base case of the modified Viterbi algorithm is correct, still returning the most probable path that emits the first observed state. 
+Using proof (2) it is apparent that the inductive step of our modified Viterbi is also correct, calculating the most probable path to $\delta_t(j)$. Hence by induction our modified Viterbi algorithm is correct.  
 
 
 
 \subsubsection*{Complexity}
-Firstly, time complexity. Let $k$ be the number of hidden states. The time complexity of the original Viterbi algorithm is $O(nk^2)$ as for every time step we consider the path from each hidden state to every other hidden state. We calculate $\psi$ and $\Pi$ in preprocessing steps. Therefore, our adapted Viterbi algorithm also has running time $O(nk^2)$ as the lookup time for $\psi(i,j)$ and $\Pi(i)$ is $O(1)$. Djiksta's algorithm has complexity $O(|E|+|V|log|V|)$. Calculating $\Pi$, $|E| = k+1$ and $|V| = k^2 + k$ so we have complexity $O(k+1 + (k^2+1) \log(k^2+k)) = O(k^2 \log(k))$. Calculating $\psi$, $|E| = k$ and $|V| = k^2$ so we have complexity $O(k + k^2 \log(k^2)) = O(k^2 \log(k))$ for each $k$ states. Hence, the overall complexity of calculating $\psi$ is $k\cdot O(k^2 \log(k)) = O(k^3 \log(k))$. The complexity of backtracking all nodes in a graph after Djiksta's is $O(k^2)$, so backtracking $k$ rounds of Djiksta's will have complexity $O(k^3)$. Backtracking Viterbi is $O(n)$, however given our modification you may need to copy paths of length $k$ at every step, hence it has total running time $O(nk)$. The overall time complexity of this algorithm is:
+Firstly, time complexity. 
+Let $k$ be the number of hidden states.
+The time complexity of the original Viterbi algorithm is $O(nk^2)$ as for every time step we consider the path from each hidden state to every other hidden state. We calculate $\psi$ and $\Pi$ in preprocessing steps.
+Therefore, our adapted Viterbi algorithm also has running time $O(nk^2)$ as the lookup time for $\psi(i,j)$ and $\Pi(i)$ is $O(1)$.
+Djiksta's algorithm has complexity $O(|E|+|V|log|V|)$.
+Calculating $\Pi$, $|E| = k+1$ and $|V| = k^2 + k$ so we have complexity $O(k+1 + (k^2+1) \log(k^2+k)) = O(k^2 \log(k))$.
+Calculating $\psi$, $|E| = k$ and $|V| = k^2$ so we have complexity $O(k + k^2 \log(k^2)) = O(k^2 \log(k))$ for each $k$ states. Hence, the overall complexity of calculating $\psi$ is $k\cdot O(k^2 \log(k)) = O(k^3 \log(k))$.
+The complexity of backtracking all nodes in a graph after Djiksta's is $O(k^2)$, so backtracking $k$ rounds of Djiksta's will have complexity $O(k^3)$.
+Backtracking Viterbi is $O(n)$, however given our modification you may need to copy paths of length $k$ at every step, hence it has total running time $O(nk)$. The overall time complexity of this algorithm is:
 \begin{align*}
 &O(k^3 \log(k)) + O(k^2 \log(k)) + O(nk^2) + O(k^3) + O(nk)\\
 =& O(k^3 \log(k)) + O(nk^2)
 \end{align*}
 
-Next, space complexity. We will continue to use $k$ as the number of hidden states. The forward pass of Viterbi requires $O(k)$ space and the backtrack matrix requires $O(nk)$ space. Djiksta's requires $O(k^2)$ space to store the graph, however we only need to store one graph at a time. Calculating Djiksta's will also require $O(k)$ space as we store a value for every states. Storing $\psi$ will require $O(k^2)$ space. Storing the corresponding paths of $\psi$ will require $O(k^3)$ space as for every value of $\psi$ the maximum length of path is $k$. Therefore the total space complexity is:
+Next, space complexity.
+We will continue to use $k$ as the number of hidden states.
+The forward pass of Viterbi requires $O(k)$ space and the backtrack matrix requires $O(nk)$ space.
+Djiksta's requires $O(k^2)$ space to store the graph, however we only need to store one graph at a time.
+Calculating Djiksta's will also require $O(k)$ space as we store a value for every states.
+Storing $\psi$ will require $O(k^2)$ space.
+Storing the corresponding paths of $\psi$ will require $O(k^3)$ space as for every value of $\psi$ the maximum length of path is $k$.
+Therefore the total space complexity is:
 \begin{align*}
     O(k^3) + O(nk)
 \end{align*} 
@@ -80,9 +98,12 @@ Next, space complexity. We will continue to use $k$ as the number of hidden stat
 
 \subsection{}
 A hidden markov model can be defined as $\lambda = (\pi, m, e)$ where: $\pi$ are the initial probabilities, $m$ are the transition probabilities, and $e$ are the emission probabilities.
-The goal of the Expectation Maximisation algorithm is to calculate a value of $\lambda$ that maximises $p(x|\lambda)$ for a given sequence of observed data $x$. As finding a global maximum is computationally intractable we use the Baum-Welch algorithm which gives us a local maximum. The Baum-Welch algorithm generates $\hat{\lambda}$ from $\lambda$ where $p(x|\hat{\lambda}) \geq p(x|\lambda)$. Iterating this process, where at each step we say $\lambda \gets \hat{\lambda}$, converges to a local optimum.
+The goal of the Expectation Maximisation algorithm is to calculate a value of $\lambda$ that maximises $p(x|\lambda)$ for a given sequence of observed data $x$.
+As finding a global maximum is computationally intractable we use the Baum-Welch algorithm which gives us a local maximum. The Baum-Welch algorithm generates $\hat{\lambda}$ from $\lambda$ where $p(x|\hat{\lambda}) \geq p(x|\lambda)$.
+Iterating this process, where at each step we say $\lambda \gets \hat{\lambda}$, converges to a local optimum.
 
-To calculate $\hat{\lambda}$ we can use some helper functions as described by L.R. Rabiner \cite{em}. We will use additional notation $N$ ass the number of hidden states, $O_t$ the observation at time (position) $t$ and $T$ as $|O|$.  The first helper function is $\alpha$, which is the forward algorithm.
+To calculate $\hat{\lambda}$ we can use some helper functions as described by L.R. Rabiner \cite{em}.
+We will use additional notation $N$ ass the number of hidden states, $O_t$ the observation at time (position) $t$ and $T$ as $|O|$.  The first helper function is $\alpha$, which is the forward algorithm.
 \begin{gather*}
     \alpha_1(i) = \pi_i e_i(O_1)\\
     \alpha_{t+1}(i) = e_j(O_{t+1}) \cdot \sum_{i=1}^N\alpha_t(i)m_{ij}
@@ -112,7 +133,10 @@ Using these helper functions we can calculate $\hat{\lambda}=(\hat{\pi}, \hat{m}
 \end{gather*}
 
 
-We can tackle verification of the algorithm using 2 methods: by testing helper function and by observing that the algorithm maximises $p(x|\lambda)$. I verified each helper function with unit tests that: verify base cases (if applicable); and verify against known mathematical identities. Following are a small sample of the 8 identities I test against. NOTE: a free index implies that the identity hold over domain of the index, in some cases I test across the whole domain, in others just a sample, depending on what is computationally feasible.
+We can tackle verification of the algorithm using 2 methods: by testing helper function and by observing that the algorithm maximises $p(x|\lambda)$.
+I verified each helper function with unit tests that: verify base cases (if applicable); and verify against known mathematical identities.
+Following are a small sample of the 8 identities I test against.
+NOTE: a free index implies that the identity hold over domain of the index, in some cases I test across the whole domain, in others just a sample, depending on what is computationally feasible.
 
 \begin{gather*}
     %\sum_i \alpha_t(i) = 1 \\ wrong
@@ -126,7 +150,11 @@ We can tackle verification of the algorithm using 2 methods: by testing helper f
 \end{gather*}
 
 
-To validate that the algorithm maximises $p(x|\lambda)$ we can plot $p(x|\lambda)$ against the iteration. Figure \ref{fig:em} shows 2 experiments that both use a fixed $x$ with 5 random initial $\lambda$. We see in Figure \ref{fig:em} that in all 10 runs $p(x|\lambda)$ converges at various local maxima. Experiments using different $x$ and $\lambda$ yield similar results, as you would expect. This provides strong evidence that the algorithm is valid.
+To validate that the algorithm maximises $p(x|\lambda)$ we can plot $p(x|\lambda)$ against the iteration.
+Figure \ref{fig:em} shows 2 experiments that both use a fixed $x$ with 5 random initial $\lambda$.
+We see in Figure \ref{fig:em} that in all 10 runs $p(x|\lambda)$ converges at various local maxima.
+Experiments using different $x$ and $\lambda$ yield similar results, as you would expect.
+This provides strong evidence that the algorithm is valid.
 
 \begin{figure}[h!]
     \begin{center}
