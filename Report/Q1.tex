@@ -1,18 +1,29 @@
 \subsection{}
-First let us extend the alphabet $\Sigma$ to $\Sigma' = \Sigma \cup \{\epsilon\}$ where $\epsilon$ is the empty sting. Now, for each state $s\in S$, $e_s(\epsilon) = 1 - \sum_{a\in \Sigma} e_s(a)$ hence $\sum_{a\in \Sigma'} e_s(a) = 1$. Using epsilon we can now consider the problem as finding the most likely sequence of states to generate our sequence, $O$, of $n$ letters with any amount of $\epsilon$ in $O$ at any position.
+First let us extend the alphabet $\Sigma$ to $\Sigma' = \Sigma \cup \{\epsilon\}$ where $\epsilon$ is the empty sting. Now, for each state $s\in S$, $e_s(\epsilon) = 1 - \sum_{a\in \Sigma} e_s(a)$ hence $\sum_{a\in \Sigma'} e_s(a) = 1$. Using epsilon we can now consider the problem as finding the most likely sequence of states to generate our sequence, $O$, of $n$ symbols with any number of $\epsilon$ in $O$ at any position.
 
-The Viterbi Algorithm can be described mathematically as:
+The Viterbi Algorithm $\delta$ can be described mathematically as:
 \begin{align*}
 \textbf{Base Case: } &\delta_1(i) = \pi_i e_i(O_1)\\
 \textbf{Inductive Case: } &\delta_t(j) = \max_{1\leq i \leq N}[\delta_{t-1}(i)m_{ij}]\cdot e_j(O_t)
 \end{align*}
 
-Our new algorithm will extend the Viterbi algorithm. As a high level explanation, our new algorithm will no longer assume in the inductive step that we directly transition from state $i$ to $j$ with probability $m_{ij}$. Instead it will allow any path from $i$ to $j$ where any intermediate states will emit $\epsilon$. Given we are finding a maximum probability we need only consider the most likely path from $i$ to $j$. To describe this path we will define $\psi(i,j)$ as the maximum path from $i$ to $j$ where transitions $x$ to $y$ must emit $\epsilon$ unless $x=i$ (as we know $i$ has already emitted letter $O_t$).
+Our new algorithm will extend the Viterbi algorithm. As a high level explanation, our new algorithm will no longer assume in the inductive step that we directly transition from state $i$ to $j$ with probability $m_{ij}$. Instead it will allow any path from $i$ to $j$, where if we travel through an intermediate state it will emit $\epsilon$. Given we are finding a maximum probability we need only consider the most likely path from $i$ to $j$. To describe this path we will define $\psi(i,j)$ as the path of maximum likelihood from $i$ to $j$ where transitions $x$ to $y$ must emit $\epsilon$ unless $x=i$ (as we know $i$ has already emitted symbol $O_t$).
 
-You can calculate $\psi$ using Dijksta's algorithm. To do this we will use Dijkstra's to find the maximal path from a specified starting state $i$ to all other states. This will compute entries $\psi(i,j)$ for all $j\neq i$. Doing this for each state $i$ will compute most of $\psi$. To fully compute $\psi$, we need to compute all $\psi(i,i)$ which are simply $m_{ii}$.
-The graph we preform Djiksta's on has a vertex for each state in $S$. The graph is fully connected. Edge weights are $m_{xy}\cdot e_x(\epsilon)$ for each state $x$ except when $x=i$, in that case the edge weights are $m_{iy}$. It is not immediately apparent how you can preform Djiksta's to maximise a product of probabilities, however there are 2 options. You could transform every probability into a negative log probability, then minimise the sum of negative log probabilities; You can run the standard Dijksta's on this graph. Or you can slightly modify Dijksta's so where you use minimum distances you now use maximum distances; and where you calculate the sum of distances you instead take the product.
+You can calculate $\psi$ using Dijksta's algorithm. To do this we will use Dijkstra's to find the maximal path from a specified starting state $i$ to all other states. 
+This will compute entries $\cup_{j \neq i} \psi(i,j)$ for a fixed $i$. Doing this for each state $i$ will compute most of $\psi$. To fully compute $\psi$, we need to compute all $\psi(i,i)$ which are simply $m_{ii}$.
+The graph we preform Djiksta's on has a vertex for each state in $S$. 
+The graph is fully connected. 
+Edge weights are $m_{xy}\cdot e_x(\epsilon)$ for each state $x$, except when $x=i$, in this case the edge weights are $m_{iy}$.
+It is not immediately apparent how you can preform Djiksta's to maximise a product of probabilities, however there are 2 methods.
+You can transform every probability into a negative log probability, then minimise the sum of negative log probabilities; You can run the standard Dijksta's on this graph. 
+Or you can slightly modify Dijksta's so where you use minimum distances you now use maximum distances; and where you calculate the sum of distances you instead take the product.
 
-Now we have defined $\psi$, we next need to consider the base case for our modified Viterbi. As is, the Viterbi algorithm assumes we instantly emit the first observed state, however this is not the case now we can emit $\epsilon$, as we may have empty strings at the beginning before $O_1$. The solution to this problem is to define a new function $\Pi$. Much like $\psi$, $\Pi(i)$ will be the most probable path from the starting state to $i$. We can calculate this again using Dijkstra's using a graph where we have 1 vertex for every state and an extra start vertex. Edges between 2 states $i,j$ have weight $m_{ij}\cdot e_i{\epsilon}$. Edges from the start vertex to states $i$ have wight $\pi_i$.
+Now we have defined $\psi$, we next need to consider the base case for our modified Viterbi.
+As is, the Viterbi algorithm assumes we instantly emit the first observed state, however this is not the case now we can emit $\epsilon$, as we may have empty strings at the beginning before $O_1$. 
+The solution to this problem is to define a new function $\Pi$. 
+Much like $\psi$, $\Pi(i)$ will be the most probable path from the starting state to state $i$. 
+We can calculate this again using Dijkstra's using a graph where we have 1 vertex for every state and an extra start vertex.
+Edges between 2 states $i,j$ have weight $m_{ij}\cdot e_i{\epsilon}$. Edges from the start vertex to states $i$ have wight $\pi_i$.
 
 Using the tools we have created we can now adapt the Viterbi Algorithm to solve the problem.
 
@@ -22,13 +33,32 @@ Using the tools we have created we can now adapt the Viterbi Algorithm to solve 
     \textbf{Inductive Case: } &\delta_t(j) = \max_{1\leq i \leq N}[\delta_{t-1}(i)\psi(i,j)]\cdot e_j(O_t)
 \end{align*}
 
-Backtracking this new algorithm only requires minor modifications. We need to keep a track of each corresponding shortest path for every value of $\psi(i,j)$. We also need to keep track of preceding states during the Viterbi algorithm, much like you normally would. When backtracking you backtrack through Viterbi as usual; However, now if node $i$ proceeds $j$ we don't just add node $i$ to the path, we add the path of states corresponding to $\psi(i,j)$.
+Backtracking this new algorithm only requires minor modifications. 
+We need to keep a track of each corresponding shortest path for every value of $\psi(i,j)$.
+We also need to keep track of preceding states during the Viterbi algorithm, much like you normally would.
+When backtracking you backtrack through Viterbi as usual; However, now if node $i$ precede $j$ we don't just add node $i$ to the path, we add the path of states corresponding to $\psi(i,j)$.
 
 \subsubsection*{Proof of Correctness}
 
-\textbf{(1) Proof:} Dijkstras algorithm calculates the most probable path between 2 states. By construction the graph we create represents the probability of transitioning states. Dijkstras algorithm will find the shortest path from a start node to every other node. However, as we are working with probabilities, not distances, we want to take the product of probabilities along a path and seek a maximum instead. We can reduce the problem of most probable path to the shortest path by transforming all probabilities into negative log probabilities. Now rather than maximising a product we are minimising a sum. If wee look at the new edge weights, for any probability $p$: $0 \leq p \leq 1$, it follows that $-\infty < \log(p) \leq 0$ hence $0 \leq -\log(p) < \infty$. As all edges are non-negative, and by the correctness of Djiksta's, we will calculate the minimum negative log probability which is equivalent to maximum probable path.
 
-\textbf{(2) Proof:} At each Viterbi step between states $i,j$ the most likely path will use the path corresponding to $\psi(i,j)$. Assume that we don't use the path corresponding to $\psi(i,j)$ and instead use a path with probability $\alpha$ where $\alpha \neq \psi(i,j)$. The total probability of the path entire path is $\alpha \cdot \beta$, where $\beta$ is the probability of the rest of the path. However, using the pervious proof we know $\alpha < \psi(i,j)$ hence $\alpha \cdot \beta < \psi(i,j) \cdot \beta$, a contradiction. Therefore the most probable path must use the path corresponding to $\psi(i,j)$. 
+\begin{lemma}
+    \label{prb:brouwer}
+    Dijkstras algorithm calculates the most probable path between 2 states.
+\end{lemma}
+\begin{proof}
+    By construction, the graph we create represents the probability of transitioning states. 
+    Dijkstras algorithm will find the shortest path from a start node to every other node. 
+    However, as we are working with probabilities, not distances, we want to take the product of probabilities along a path and seek a maximum instead.
+    We can reduce the problem of most probable path to the shortest path by transforming all probabilities into negative log probabilities. Now rather than maximising a product we are minimising a sum.
+    If we look at the new edge weights, for any probability $p$: $0 \leq p \leq 1$, it follows that $-\infty < \log(p) \leq 0$ hence $0 \leq -\log(p) < \infty$.
+    As all edges are non-negative, and by the correctness of Djiksta's, we will calculate the minimum negative log probability which is equivalent to maximum probable path.
+\end{proof}
+
+
+\textbf{(2) Proof:} At each Viterbi step between states $i,j$ the most likely path will use the path corresponding to $\psi(i,j)$. 
+Assume that we don't use the path corresponding to $\psi(i,j)$ and instead use a path with probability $\alpha$ where $\alpha \neq \psi(i,j)$.
+The total probability of the path entire path is $\alpha \cdot \beta$, where $\beta$ is the probability of the rest of the path.
+However, using the pervious proof we know $\alpha < \psi(i,j)$ hence $\alpha \cdot \beta < \psi(i,j) \cdot \beta$, a contradiction. Therefore the most probable path must use the path corresponding to $\psi(i,j)$. 
 
 \textbf{(3) Proof:} The algorithm is correct. Using a similar argument to proof (1) we can show the base case of the modified Viterbi algorithm is correct, still returning the most probable path that emits the first observed state. Using proof (2) it is apparent that the inductive step of our modified Viterbi is also correct, calculating the most probable path to $\delta_t(j)$. Hence by induction our modified Viterbi algorithm is correct.  
 
