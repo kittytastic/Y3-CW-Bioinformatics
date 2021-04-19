@@ -42,8 +42,8 @@ When backtracking you backtrack through Viterbi as usual; However, now if node $
 
 
 \begin{lemma}
-    \label{prb:brouwer}
-    Dijkstras algorithm calculates the most probable path between 2 states.
+    \label{prb:djPath}
+    Dijkstras algorithm can be used to calculate the most probable path between 2 states.
 \end{lemma}
 \begin{proof}
     By construction, the graph we create represents the probability of transitioning states. 
@@ -54,16 +54,27 @@ When backtracking you backtrack through Viterbi as usual; However, now if node $
     As all edges are non-negative, and by the correctness of Djiksta's, we will calculate the minimum negative log probability which is equivalent to maximum probable path.
 \end{proof}
 
-
-\textbf{(2) Proof:} At each Viterbi step between states $i,j$ the most likely path will use the path corresponding to $\psi(i,j)$. 
+\begin{lemma}
+    \label{prb:vt}
+    At each Viterbi step between states $i,j$ the most likely path will use the path corresponding to $\psi(i,j)$.
+\end{lemma}
+\begin{proof}
 Assume that we don't use the path corresponding to $\psi(i,j)$ and instead use a path with probability $\alpha$ where $\alpha \neq \psi(i,j)$.
 The total probability of the path entire path is $\alpha \cdot \beta$, where $\beta$ is the probability of the rest of the path.
 However, using the pervious proof we know $\alpha < \psi(i,j)$ hence $\alpha \cdot \beta < \psi(i,j) \cdot \beta$, a contradiction. 
 Therefore the most probable path must use the path corresponding to $\psi(i,j)$. 
+\end{proof}
 
-\textbf{(3) Proof:} The algorithm is correct. 
-Using a similar argument to proof (1) we can show the base case of the modified Viterbi algorithm is correct, still returning the most probable path that emits the first observed state. 
-Using proof (2) it is apparent that the inductive step of our modified Viterbi is also correct, calculating the most probable path to $\delta_t(j)$. Hence by induction our modified Viterbi algorithm is correct.  
+\begin{lemma}
+    \label{prb:final}
+    The algorithm is correct. 
+\end{lemma}
+\begin{proof}
+Using a similar argument to the proof of \cref{prb:djPath} we can show the base case of the modified Viterbi algorithm is correct, still returning the most probable path that emits the first observed state. 
+Using \cref{prb:vt} it is apparent that the inductive step of our modified Viterbi is also correct, calculating the most probable path to $\delta_t(j)$. Hence by induction our modified Viterbi algorithm is correct.
+\end{proof}
+
+  
 
 
 
@@ -85,7 +96,7 @@ Backtracking Viterbi is $O(n)$, however given our modification you may need to c
 Next, space complexity.
 We will continue to use $k$ as the number of hidden states.
 The forward pass of Viterbi requires $O(k)$ space and the backtrack matrix requires $O(nk)$ space.
-Djiksta's requires $O(k^2)$ space to store the graph, however we only need to store one graph at a time.
+Djiksta's requires $O(k^2)$ space to store the graph, although we only need to store one graph at a time.
 Calculating Djiksta's will also require $O(k)$ space as we store a value for every states.
 Storing $\psi$ will require $O(k^2)$ space.
 Storing the corresponding paths of $\psi$ will require $O(k^3)$ space as for every value of $\psi$ the maximum length of path is $k$.
@@ -99,11 +110,13 @@ Therefore the total space complexity is:
 \subsection{}
 A hidden markov model can be defined as $\lambda = (\pi, m, e)$ where: $\pi$ are the initial probabilities, $m$ are the transition probabilities, and $e$ are the emission probabilities.
 The goal of the Expectation Maximisation algorithm is to calculate a value of $\lambda$ that maximises $p(x|\lambda)$ for a given sequence of observed data $x$.
-As finding a global maximum is computationally intractable we use the Baum-Welch algorithm which gives us a local maximum. The Baum-Welch algorithm generates $\hat{\lambda}$ from $\lambda$ where $p(x|\hat{\lambda}) \geq p(x|\lambda)$.
+As finding a global maximum is computationally intractable we use the Baum-Welch algorithm which gives us a local maximum.
+The Baum-Welch algorithm generates $\hat{\lambda}$ from $\lambda$ where $p(x|\hat{\lambda}) \geq p(x|\lambda)$.
 Iterating this process, where at each step we say $\lambda \gets \hat{\lambda}$, converges to a local optimum.
 
 To calculate $\hat{\lambda}$ we can use some helper functions as described by L.R. Rabiner \cite{em}.
-We will use additional notation $N$ ass the number of hidden states, $O_t$ the observation at time (position) $t$ and $T$ as $|O|$.  The first helper function is $\alpha$, which is the forward algorithm.
+We will use the additional notation: $N$ as the number of hidden states, $O_t$ the observation at time (position) $t$ and $T$ as $|O|$.
+The first helper function is $\alpha$, which is the forward algorithm.
 \begin{gather*}
     \alpha_1(i) = \pi_i e_i(O_1)\\
     \alpha_{t+1}(i) = e_j(O_{t+1}) \cdot \sum_{i=1}^N\alpha_t(i)m_{ij}
@@ -134,7 +147,7 @@ Using these helper functions we can calculate $\hat{\lambda}=(\hat{\pi}, \hat{m}
 
 
 We can tackle verification of the algorithm using 2 methods: by testing helper function and by observing that the algorithm maximises $p(x|\lambda)$.
-I verified each helper function with unit tests that: verify base cases (if applicable); and verify against known mathematical identities.
+I verified each helper function with unit tests that verify relevant base cases (if applicable), and verify against known mathematical identities.
 Following are a small sample of the 8 identities I test against.
 NOTE: a free index implies that the identity hold over domain of the index, in some cases I test across the whole domain, in others just a sample, depending on what is computationally feasible.
 
