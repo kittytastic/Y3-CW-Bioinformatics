@@ -170,7 +170,8 @@ To validate that the algorithm maximises $p(x|\lambda)$ we can plot $p(x|\lambda
 Figure \ref{fig:em} shows 2 experiments that both use a fixed $x$ with 5 random initial $\lambda$.
 We see in Figure \ref{fig:em} that in all 10 runs $p(x|\lambda)$ converges at various local maxima.
 Experiments using different $x$ and $\lambda$ yield similar results, as you would expect.
-This provides strong evidence that the algorithm is valid.
+We can also see in figure \ref{fig:em3} that $p(x|\lambda)$ increases with the number of hidden states, another expected property.
+The tests, expectation maximisation and expected characteristic; provide strong evidence that the algorithm is valid.
 
 \begin{figure}[h!]
     \begin{center}
@@ -188,7 +189,17 @@ This provides strong evidence that the algorithm is valid.
         \label{fig:em2}
     \end{center}
         \end{subfigure}%
-        \caption{Convergence of $p(x|\lambda)$ to local maxima for 2 values of $x$ each using 5 randomly initialised $\lambda$.}
+        \caption{Convergence of $p(x|\lambda)$ to local maxima for 2 values of $x$ each using 5 randomly initialised $\lambda$. \ref{fig:em1} uses sequence length 50, 10 hidden states and 5 observable states. \ref{fig:em2} uses sequence length 100, 15 hidden states and 5 observable states.}
     \label{fig:em}
     \end{center}
     \end{figure}
+
+    \begin{figure}[h!]
+        \begin{center}
+        
+        \includegraphics[width=.7\textwidth]{EM3.png}
+        \caption{Convergence of $p(x|\lambda)$ to local maxima for sequence length 1000, 5 observable states, and 10 (Blue), 20 (Yellow), 30 (Green), 40 (Red), 50 (Purple) hidden states.}
+        \label{fig:em3}
+        
+        \end{center}
+        \end{figure}
