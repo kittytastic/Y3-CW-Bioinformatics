@@ -122,7 +122,7 @@ We will use the additional notation: $N$ as the number of hidden states, $O_t$ t
 The first helper function is $\alpha$, which is the forward algorithm.
 \begin{gather*}
     \alpha_1(i) = \pi_i e_i(O_1)\\
-    \alpha_{t+1}(i) = e_j(O_{t+1}) \cdot \sum_{i=1}^N\alpha_t(i)m_{ij}
+    \alpha_{t+1}(j) = e_j(O_{t+1}) \cdot \sum_{i=1}^N\alpha_t(i)m_{ij}
 \end{gather*}
 
 The next $\beta$, which is the backward algorithm :
@@ -138,7 +138,7 @@ Then $\gamma$ which is the probability of being in a state at a point in time, g
 
 And finally $\xi$, the probability of transitioning from state i to state j given we know all observations preceding i and succeeding j.
 \begin{gather*}
-    \xi_t(i, j) = \frac{\alpha_t(i) m_{ij} e_j(O_{t+1}) \beta_{t+1}(j)}{\sum_{i=1}^N \sum_{j=1}^N \alpha_t(i) m_{ij} e_j(O_{t+1}) \beta_{t+1}(j)}
+    \xi_t(i, j) = \frac{\alpha_t(i) m_{ij} e_j(O_{t+1}) \beta_{t+1}(j)}{\sum_{x=1}^N \sum_{y=1}^N \alpha_t(x) m_{xy} e_y(O_{t+1}) \beta_{t+1}(y)}
 \end{gather*}
 
 Using these helper functions we can calculate $\hat{\lambda}=(\hat{\pi}, \hat{m}, \hat{e})$.
