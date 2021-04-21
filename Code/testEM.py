@@ -357,6 +357,51 @@ class TestIterModel(unittest.TestCase):
 
         self.assertTrue(np.allclose(new_model.pi, pseudo_pi))
 
+    def test_m_full(self):
+        O = randomSequence(30, self.observe)
+        alpha, beta, gamma, xi, new_model = self.createNewModel(self.model, O)
+        
+        pseudo_m = np.ones((self.hidden, self.hidden))
+
+        for i in range(self.hidden):
+            for j in range(self.hidden):
+                parts = []
+                for t in range(len(O)-1):
+                    parts.append(xi[t, i, j])
+                top = safeLogAdd(np.array(parts))
+
+                parts = []
+                for t in range(len(O)-1):
+                    parts.append(gamma[t, i])
+                bottom = safeLogAdd(np.array(parts))
+
+                pseudo_m[i, j] = top - bottom
+
+        self.assertTrue(np.allclose(new_model.m, pseudo_m))
+
+    def test_e_full(self):
+        O = randomSequence(30, self.observe)
+        alpha, beta, gamma, xi, new_model = self.createNewModel(self.model, O)
+        
+        pseudo_e = np.ones((self.hidden, self.observe))
+
+        for i in range(self.hidden):
+            for k in range(self.observe):
+                parts = []
+                for t in range(len(O)):
+                    if O[t] == k:
+                        parts.append(gamma[t, i])
+                top = safeLogAdd(np.array(parts))
+
+                parts = []
+                for t in range(len(O)):
+                    parts.append(gamma[t, i])
+                bottom = safeLogAdd(np.array(parts))
+
+                pseudo_e[i, k] = top - bottom
+
+        self.assertTrue(np.allclose(new_model.e, pseudo_e))
+
 class TestMainFunction(unittest.TestCase):
     hidden = 6
     observe = 5
