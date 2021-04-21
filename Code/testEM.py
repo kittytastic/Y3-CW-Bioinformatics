@@ -2,8 +2,13 @@ import unittest
 
 from EM import *
 import numpy as np
+from itertools import product
+import random
 
 LOG_1 = 0
+
+def randomSequence(length, max_char):
+    return [ random.randint(0, max_char-1) for _ in range(length)]
 
 class TestSafeLogAdd(unittest.TestCase):
     def test_vs_easy_log(self):
@@ -77,13 +82,32 @@ class TestCalcAlpha(unittest.TestCase):
         
     def test_inductive_case_sum_1(self):
         
+        all_sequences = list(product(range(0, self.observe), repeat=5))
         all_alphas = []
-        for i in range(self.observe):
-            for j in range(self.observe):
-                alpha = calculateAlpha(self.model, [i, j])
-                all_alphas.append(safeLogAdd(alpha[1]))
+
+        for s in all_sequences:
+            alpha = calculateAlpha(self.model, s)
+            all_alphas.append(safeLogAdd(alpha[-1]))
 
         self.assertAlmostEqual(safeLogAdd(np.array(all_alphas)), LOG_1)
+
+    def test_full(self):
+        O = randomSequence(30, self.observe)
+        alpha = calculateAlpha(self.model, O)
+        pseudo_alpha = np.ones((len(O), self.hidden))
+        
+        for i in range(self.hidden):
+            pseudo_alpha[0, i] = self.model.pi[i] + self.model.e[i, O[0]]
+
+        for t in range(0, len(O)-1):
+            for j in range(self.hidden):
+                parts = []
+                for i in range(self.hidden):
+                    parts.append(pseudo_alpha[t, i]+self.model.m[i,j])
+                
+                pseudo_alpha[t+1,j] = self.model.e[j, O[t+1]] + safeLogAdd(np.array(parts))
+
+        self.assertTrue(np.allclose(alpha, pseudo_alpha))
 
 
 class TestCalcBeta(unittest.TestCase):
@@ -120,6 +144,25 @@ class TestCalcBeta(unittest.TestCase):
 
         self.assertAlmostEqual(safeLogAdd(np.array(betas)), LOG_1)
 
+    def test_full(self):
+        O = randomSequence(30, self.observe)
+        beta = calculateBeta(self.model, O)
+        
+        pseudo_beta = np.ones((len(O), self.hidden))
+        
+        for i in range(self.hidden):
+            pseudo_beta[-1, i] = LOG_1
+
+        for t in reversed(range(len(O)-1)):
+            for i in range(self.hidden):
+                parts = []
+                for j in range(self.hidden):
+                    parts.append(self.model.m[i, j]+self.model.e[j,O[t+1]]+pseudo_beta[t+1, j])
+                
+                pseudo_beta[t,i] = safeLogAdd(np.array(parts))
+
+        self.assertTrue(np.allclose(beta, pseudo_beta))
+
 class TestCalcGamma(unittest.TestCase):
     hidden = 5
     observe = 3
@@ -150,7 +193,30 @@ class TestCalcGamma(unittest.TestCase):
         gamma = calculateGamma(self.model, obsStates, alpha, beta)
 
         for i in range(self.observe):
-            self.assertAlmostEqual(logAddExp(gamma[i]), LOG_1)
+            self.assertAlmostEqual(safeLogAdd(gamma[i]), LOG_1)
+
+    def test_full(self):
+        O = randomSequence(30, self.observe)
+        alpha = calculateAlpha(self.model, O)
+        beta = calculateBeta(self.model, O)
+
+        gamma = calculateGamma(self.model, O, alpha, beta)
+
+        pseudo_gamma = np.ones((len(O), self.hidden))
+        
+        for t in range(len(O)):
+            for i in range(self.hidden):
+                parts = []
+                for j in range(self.hidden):
+                    parts.append(alpha[t, j]+beta[t, j])
+                denom = safeLogAdd(np.array(parts))
+            
+                pseudo_gamma[t, i] = alpha[t,i]+beta[t,i] - denom 
+
+        self.assertTrue(np.allclose(gamma, pseudo_gamma))
+
+        
+       
 
 
 class TestCalcXi(unittest.TestCase):
@@ -202,6 +268,32 @@ class TestCalcXi(unittest.TestCase):
             for i in range(self.model.hidden):
                 self.assertAlmostEqual(safeLogAdd(xi[t, i]), gamma[t,i])
 
+    def test_full(self):
+        O = randomSequence(30, self.observe)
+        alpha = calculateAlpha(self.model, O)
+        beta = calculateBeta(self.model, O)
+
+        gamma = calculateGamma(self.model, O, alpha, beta)
+
+        xi = calculateXi(self.model, O, alpha, beta, gamma)
+
+        pseudo_xi = np.ones((len(O)-1, self.hidden, self.hidden))
+        
+        for t in range(len(O)-1):
+            for i in range(self.hidden):
+                for j in range(self.hidden):
+
+                    parts = []
+                    for x in range(self.hidden):
+                        for y in range(self.hidden):
+                            parts.append(alpha[t, x]+self.model.m[x,y]+self.model.e[y, O[t+1]]+beta[t+1, y])
+
+                    denom = safeLogAdd(np.array(parts))
+
+                    pseudo_xi[t, i, j] = alpha[t,i]+self.model.m[i, j]+self.model.e[j, O[t+1]]+beta[t+1, j] - denom 
+
+        self.assertTrue(np.allclose(xi, pseudo_xi))
+
 
 class TestIterModel(unittest.TestCase):
     hidden = 5
@@ -245,6 +337,25 @@ class TestIterModel(unittest.TestCase):
         for i in range(self.hidden):
             self.assertAlmostEqual(safeLogAdd(new_model.e[i]), LOG_1)
 
+    def createNewModel(self, starting_model, O):
+        alpha = calculateAlpha(starting_model, O)
+        beta = calculateBeta(starting_model, O)
+        gamma = calculateGamma(starting_model, O, alpha, beta)
+        xi = calculateXi(starting_model, O, alpha, beta, gamma)
+        new_model = iterateModel(starting_model, O, gamma, xi)
+
+        return alpha, beta, gamma, xi, new_model
+    
+    def test_pi_full(self):
+        O = randomSequence(30, self.observe)
+        alpha, beta, gamma, xi, new_model = self.createNewModel(self.model, O)
+        
+        pseudo_pi = np.ones((self.hidden))
+
+        for i in range(self.hidden):
+            pseudo_pi[i] = gamma[0, i]
+
+        self.assertTrue(np.allclose(new_model.pi, pseudo_pi))
 
 class TestMainFunction(unittest.TestCase):
     hidden = 6
