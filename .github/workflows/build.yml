@@ -37,23 +37,26 @@ jobs:
           pip install numpy
 
       - name: Test Solution
-        run: python ../Code/testEM.py
+        run: |
+          cp ../Code/testEM.py ./  
+          python testEM.py
         working-directory: ./tmp
       
       - name: Clean Solution
         working-directory: ./tmp
         run: |
           rm -r __pycache__
+          rm testEM.py
         
       # LATEX
       - name: Build Latex
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: |
-            Report/report.tex
+          working_directory: ./Report
+          root_file: report.tex
 
       - name: Copy Data Report 
-        run:  cp report.pdf ./tmp/Answers.pdf
+        run:  cp ./Report/report.pdf ./tmp/Answers.pdf
 
       # Version
       - name: Make name
