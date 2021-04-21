@@ -29,7 +29,6 @@ class TestModelCreate(unittest.TestCase):
     
     def test_pi(self):
         self.assertEqual(self.model.pi.shape, (self.hidden,))
-        #self.assertAlmostEqual(np.log(np.sum(np.exp(self.model.pi))), 0)
         self.assertAlmostEqual(safeLogAdd(self.model.pi), LOG_1)
 
     def test_m(self):
