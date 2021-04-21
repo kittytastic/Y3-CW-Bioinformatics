@@ -174,7 +174,7 @@ def calculateXi(model, observedSeq, alpha, beta, gamma):
 
 
 def iterateModel(model, observedSeq, gamma, xi):
-    pi = gamma[1]
+    pi = gamma[0]
 
     m = np.zeros((model.hidden, model.hidden))
     for i in range(model.hidden):
