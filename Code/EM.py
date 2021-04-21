@@ -30,7 +30,7 @@ def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=Fa
     
 
     iterProb = []
-    lastLogP = np.NINF
+    lastLogP = logProbOfObservations(model, observedSeq)
     iterProb.append(np.exp(lastLogP))
     i = 0
     converged = False
@@ -48,13 +48,20 @@ def estimateModel(observedSeq, numHiddenStates, numObserveableStates, verbose=Fa
         if verbose:
             print("P %d: %.2e   (log prob: %.2e)"%(i, np.exp(newLogP), newLogP))
 
-        if math.isclose(lastLogP, newLogP, rel_tol=10e-6):
-        #if abs(lastLogP-newLogP)<10e-9:
-            converged = True
-        
+        converged = has_converged(lastLogP, newLogP)
         lastLogP = newLogP
 
     return np.exp(model.pi), np.exp(model.m), np.exp(model.e), iterProb
+
+def has_converged(old_log_prob, new_log_prob):
+    # Return comparison of absolute probs if possible, otherwise compare log probs
+    min_log = np.log(np.finfo(np.float64).tiny)
+    if old_log_prob > min_log and new_log_prob>min_log:
+        #print("(absolute)")
+        return math.isclose(np.exp(old_log_prob), np.exp(new_log_prob), rel_tol=10e-6)
+    
+    #print("(log)")
+    return math.isclose(old_log_prob, new_log_prob, rel_tol=10e-6)
 
 class Model():
     def __init__(self, pi, m, e):
