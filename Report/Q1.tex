@@ -7,7 +7,10 @@ The Viterbi Algorithm $\delta$ can be described mathematically as:
 \textbf{Inductive Case: } &\delta_t(j) = \max_{1\leq i \leq N}[\delta_{t-1}(i)m_{ij}]\cdot e_j(O_t)
 \end{align*}
 
-Our new algorithm will extend the Viterbi algorithm. As a high level explanation, our new algorithm will no longer assume in the inductive step that we directly transition from state $i$ to $j$ with probability $m_{ij}$. Instead it will allow any path from $i$ to $j$, where if we travel through an intermediate state it will emit $\epsilon$. Given we are finding a maximum probability we need only consider the most likely path from $i$ to $j$. To describe this path we will define $\psi(i,j)$ as the path of maximum likelihood from $i$ to $j$ where transitions $x$ to $y$ must emit $\epsilon$ unless $x=i$ (as we know $i$ has already emitted symbol $O_t$).
+Our new algorithm will extend the Viterbi algorithm. As a high level explanation, our new algorithm will no longer assume in the inductive step that we directly transition from state $i$ to $j$ with probability $m_{ij}$. 
+Instead it will allow any path from $i$ to $j$, where if we travel through an intermediate state it will emit $\epsilon$.
+Given we are finding the most likely sequence of states we need only consider the most likely path from $i$ to $j$. 
+To describe this path we will define $\psi(i,j)$ as the path of maximum likelihood from $i$ to $j$ where transitions $x$ to $y$ must emit $\epsilon$ unless $x=i$ (as we know $i$ has already emitted symbol $O_t$).
 
 You can calculate $\psi$ using Dijksta's algorithm. To do this we will use Dijkstra's to find the maximal path from a specified starting state $i$ to all other states. 
 This will compute entries $\cup_{j \neq i} \psi(i,j)$ for a fixed $i$. Doing this for each state $i$ will compute most of $\psi$. To fully compute $\psi$, we need to compute all $\psi(i,i)$ which are simply $m_{ii}$.
@@ -46,7 +49,7 @@ When backtracking you backtrack through Viterbi as usual; However, now if node $
     Dijkstras algorithm can be used to calculate the most probable path between 2 states.
 \end{lemma}
 \begin{proof}
-    By construction, the graph we create represents the probability of transitioning states. 
+    By construction, the graph we create represents the probability of transitioning states, emitting an empty string if required. 
     Dijkstras algorithm will find the shortest path from a start node to every other node. 
     However, as we are working with probabilities, not distances, we want to take the product of probabilities along a path and seek a maximum instead.
     We can reduce the problem of most probable path to the shortest path by transforming all probabilities into negative log probabilities. Now rather than maximising a product we are minimising a sum.
@@ -56,7 +59,7 @@ When backtracking you backtrack through Viterbi as usual; However, now if node $
 
 \begin{lemma}
     \label{prb:vt}
-    At each Viterbi step between states $i,j$ the most likely path will use the path corresponding to $\psi(i,j)$.
+    At the inductive Viterbi step, between states $i,j$, the most likely path will use the path corresponding to $\psi(i,j)$.
 \end{lemma}
 \begin{proof}
 Assume that we don't use the path corresponding to $\psi(i,j)$ and instead use a path with probability $\alpha$ where $\alpha \neq \psi(i,j)$.
@@ -84,13 +87,13 @@ Let $k$ be the number of hidden states.
 The time complexity of the original Viterbi algorithm is $O(nk^2)$ as for every time step we consider the path from each hidden state to every other hidden state. We calculate $\psi$ and $\Pi$ in preprocessing steps.
 Therefore, our adapted Viterbi algorithm also has running time $O(nk^2)$ as the lookup time for $\psi(i,j)$ and $\Pi(i)$ is $O(1)$.
 Djiksta's algorithm has complexity $O(|E|+|V|log|V|)$.
-Calculating $\Pi$, $|E| = k+1$ and $|V| = k^2 + k$ so we have complexity $O(k+1 + (k^2+1) \log(k^2+k)) = O(k^2 \log(k))$.
-Calculating $\psi$, $|E| = k$ and $|V| = k^2$ so we have complexity $O(k + k^2 \log(k^2)) = O(k^2 \log(k))$ for each $k$ states. Hence, the overall complexity of calculating $\psi$ is $k\cdot O(k^2 \log(k)) = O(k^3 \log(k))$.
+Calculating $\Pi$, $|E| = k^2 + k$ and $|V| = k+1$ so we have complexity $O(k^2 + k + (k+1) \log(k+1)) = O(k^2)$.
+Calculating $\psi$, $|E| = k^2$ and $|V| = k$ so we have complexity $O(k^2 + k \log(k)) = O(k^2)$ for each $k$ states. Hence, the overall complexity of calculating $\psi$ is $k\cdot O(k^2) = O(k^3)$.
 The complexity of backtracking all nodes in a graph after Djiksta's is $O(k^2)$, so backtracking $k$ rounds of Djiksta's will have complexity $O(k^3)$.
 Backtracking Viterbi is $O(n)$, however given our modification you may need to copy paths of length $k$ at every step, hence it has total running time $O(nk)$. The overall time complexity of this algorithm is:
 \begin{align*}
-&O(k^3 \log(k)) + O(k^2 \log(k)) + O(nk^2) + O(k^3) + O(nk)\\
-=& O(k^3 \log(k)) + O(nk^2)
+&O(k^3) + O(k^2) + O(nk^2) + O(k^3) + O(nk)\\
+=& O(k^3) + O(nk^2)
 \end{align*}
 
 Next, space complexity.
