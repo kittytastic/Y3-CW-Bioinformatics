@@ -28,7 +28,8 @@ A recursive step will not eliminate any conditions nor create subsets of symbols
 
 With these methods for partitioning symbols and constraint we have all the tools we need to define the \algo{BUILD} algorithm.
 The recursive \algo{BUILD} function will taken in as arguments a set of symbols and constraints.
-It will return a tree. As a base case \algo{BUILD} on a single symbol is returned as a single node tree.
+It will return a tree. 
+As a base case \algo{BUILD} on a single symbol returns as a single node tree.
 At every step we conduct the partition step which partitions the symbols, using the rules as described above.
 If we find the partition only creates one set of symbols then we know there is no tree that satisfies these constraints, hence that error can be propagated back through the recursion, for example by returning a null tree.
 We can eliminate and partition constraints using the partitioned symbols and rules as described above.
@@ -42,8 +43,7 @@ These recursive calls will return subtrees for each child. These child subtrees 
      set $Q$ as empty queue\;
      set $\pi_C = \emptyset$\;
      %\tcc{iterate over all training examples}
-     \For{integer i as index leaves l}{
-        let $l$ be leaf $i$\;
+     \For{integer i as index to each leaf l}{
         set $S[i]$ to set $\{l\}$\;
         add $S[i]$ to $\pi_C$\;
         set $setID[l] = i$\;
@@ -153,8 +153,8 @@ The \algo{REVERSE BUILD} algorithm uses 2 function \algo{REVERSE BUILD} (\algo{R
     \KwIn{tree $T$}
     \KwOut{ set of constraints $C$ }
      set $C=\emptyset$\;
-     define leaves $l$ as previously described for tree $T$\;
-     define $N$ as the number of subtrees of tree $T$\;
+     let $l$ be the leaves of $T$ \;
+     let $N$ be the number of subtrees of tree $T$\;
      \For{subtree $s$ of $T$}{
         let $c=$ \algo{REVERSE BUILD STEP}$(s)$\;
         update $c$ so any undecided leafs $*$ are replaced by leaf $x$ where $x \in T - s$\;
